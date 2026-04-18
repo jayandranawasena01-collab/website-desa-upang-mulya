@@ -125,6 +125,14 @@ const initialGrafik = {
   updateTerakhir: "Desember 2024"
 };
 
+const thn = new Date().getFullYear();
+const bln = String(new Date().getMonth() + 1).padStart(2, '0');
+const initialAgenda = [
+  { id: 1, judul: "Kerja Bakti Bersih Desa", lokasi: "Seluruh Area Dusun", tanggal: `${thn}-${bln}-05` },
+  { id: 2, judul: "Penyaluran BLT Tahap Lanjutan", lokasi: "Balai Desa Upang Mulya", tanggal: `${thn}-${bln}-12` },
+  { id: 3, judul: "Musyawarah Perencanaan Pembangunan", lokasi: "Balai Desa Upang Mulya", tanggal: `${thn}-${bln}-28` }
+];
+
 const initialPerangkat = [
   { id: 1, nama: "SUBERO", jabatan: "KEPALA DESA", foto: "https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 2, nama: "SUPENO", jabatan: "SEKRETARIS DESA", foto: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
@@ -240,6 +248,7 @@ export default function App() {
 
   const [daftarBerita, setDaftarBerita] = useState(() => getInitialData('upang_mulya_berita', initialBerita));
   const [dataGrafik, setDataGrafik] = useState(() => getInitialData('upang_mulya_grafik', initialGrafik));
+  const [daftarAgenda, setDaftarAgenda] = useState(() => getInitialData('upang_mulya_agenda', initialAgenda));
   const [daftarPerangkat, setDaftarPerangkat] = useState(() => getInitialData('upang_mulya_perangkat', initialPerangkat));
   const [daftarLembaga, setDaftarLembaga] = useState(() => getInitialData('upang_mulya_lembaga', initialLembaga));
   const [daftarProfil, setDaftarProfil] = useState(() => getInitialData('upang_mulya_profil', initialProfil));
@@ -332,6 +341,10 @@ export default function App() {
       (snap) => handleServerData(snap, setDataGrafik, 'upang_mulya_grafik'), handleServerError
     );
 
+    const unsubAgenda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_agenda', 'main'), 
+      (snap) => handleServerData(snap, setDaftarAgenda, 'upang_mulya_agenda'), handleServerError
+    );
+
     const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_perangkat', 'main'), 
       (snap) => handleServerData(snap, setDaftarPerangkat, 'upang_mulya_perangkat'), handleServerError
     );
@@ -345,7 +358,7 @@ export default function App() {
     );
 
     return () => {
-      unsubBeranda(); unsubBerita(); unsubGrafik(); unsubPerangkat(); unsubLembaga(); unsubProfil();
+      unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil();
     };
   }, []); 
 
@@ -373,6 +386,14 @@ export default function App() {
     if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_grafik', JSON.stringify(newData));
     if(db) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_grafik', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
+  };
+
+  const updateAgenda = async (newData: any) => {
+    setDaftarAgenda(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_agenda', JSON.stringify(newData));
+    if(db) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_agenda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
 
@@ -916,6 +937,9 @@ export default function App() {
             isAdmin={isAdmin} 
             dataBeranda={dataBeranda} 
             setDataBeranda={updateBeranda} 
+            daftarAgenda={daftarAgenda}
+            setDaftarAgenda={updateAgenda}
+            showConfirm={showConfirm}
             showAlert={showAlert}
           />
         )}
@@ -1087,9 +1111,12 @@ export default function App() {
 
 /* ================= Komponen Halaman ================= */
 
-function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, showAlert }: any) {
+function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daftarAgenda, setDaftarAgenda, showConfirm, showAlert }: any) {
   const [showEditor, setShowEditor] = useState(false);
   const [editForm, setEditForm] = useState(dataBeranda);
+  
+  const [showEditorAgenda, setShowEditorAgenda] = useState(false);
+  const [editDataAgenda, setEditDataAgenda] = useState<any>({ id: null, judul: '', lokasi: '', tanggal: '' });
 
   const handleHeroBgChange = (e: any) => {
     const file = e.target.files[0];
@@ -1145,6 +1172,32 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
     showAlert("Perubahan selesai. Cek hasilnya!");
   };
 
+  // ----- Logika Editor Agenda -----
+  const openEditorAgenda = (agenda: any = null) => {
+    if (agenda) {
+      setEditDataAgenda(agenda);
+    } else {
+      setEditDataAgenda({ id: null, judul: '', lokasi: '', tanggal: '' });
+    }
+    setShowEditorAgenda(true);
+  };
+
+  const handleSaveAgenda = (e: any) => {
+    e.preventDefault();
+    if (editDataAgenda.id) {
+      setDaftarAgenda(daftarAgenda.map((a: any) => a.id === editDataAgenda.id ? editDataAgenda : a));
+    } else {
+      setDaftarAgenda([...daftarAgenda, { ...editDataAgenda, id: Date.now() }]);
+    }
+    setShowEditorAgenda(false);
+  };
+
+  const handleDeleteAgenda = (id: any) => {
+    showConfirm('Yakin ingin menghapus agenda ini?', () => {
+      setDaftarAgenda(daftarAgenda.filter((a: any) => a.id !== id));
+    });
+  };
+
   // ----- Logika Kalender -----
   const today = new Date();
   const currentMonth = today.getMonth();
@@ -1158,14 +1211,19 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
   const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
   const calendarDays = [];
-  // Tambahkan sel kosong untuk hari sebelum awal bulan
   for (let i = 0; i < firstDayOfMonth; i++) {
     calendarDays.push(null);
   }
-  // Tambahkan hari dalam bulan ini
   for (let i = 1; i <= daysInMonth; i++) {
     calendarDays.push(i);
   }
+
+  // Filter agenda untuk bulan ini (disortir berdasarkan tanggal)
+  const agendaBulanIni = daftarAgenda.filter((a: any) => {
+    if (!a.tanggal) return false;
+    const d = new Date(a.tanggal);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  }).sort((a: any, b: any) => new Date(a.tanggal).getTime() - new Date(b.tanggal).getTime());
 
   return (
     <div className="animate-in fade-in duration-700">
@@ -1344,8 +1402,12 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
               <div className="grid grid-cols-7 gap-2 sm:gap-4">
                 {calendarDays.map((day, idx) => {
                   const isToday = day === currentDay;
-                  // Simulasi hari dengan agenda
-                  const hasAgenda = day === 5 || day === 12 || day === 28;
+                  // Mengecek apakah hari ini ada dalam data agenda (dinamis)
+                  const hasAgenda = daftarAgenda.some((a: any) => {
+                    if(!a.tanggal) return false;
+                    const d = new Date(a.tanggal);
+                    return d.getDate() === day && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+                  });
                   const isSunday = (idx % 7) === 0;
 
                   return (
@@ -1375,49 +1437,49 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
             </div>
 
             {/* Agenda List (Kanan) */}
-            <div className="w-full lg:w-1/2 flex flex-col justify-center">
-              <h3 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center">
-                 <Activity className="w-6 h-6 text-emerald-600 mr-3" />
-                 Agenda Bulan Ini
-              </h3>
-              <div className="space-y-4">
-                {/* Agenda Item 1 */}
-                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 flex items-start hover:shadow-md transition">
-                  <div className="bg-white text-emerald-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center font-extrabold shadow-sm border border-emerald-100 flex-shrink-0 mr-5">
-                    <span className="text-xs uppercase tracking-widest text-emerald-500">{monthNames[currentMonth].substring(0,3)}</span>
-                    <span className="text-2xl leading-none">05</span>
-                  </div>
-                  <div>
-                    <h4 className="font-extrabold text-gray-900 text-lg">Kerja Bakti Bersih Desa</h4>
-                    <p className="text-gray-600 text-sm mt-1 font-medium flex items-center"><MapPin className="w-4 h-4 mr-1 text-emerald-500"/> Seluruh Area Dusun</p>
-                  </div>
-                </div>
-
-                {/* Agenda Item 2 */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 flex items-start hover:shadow-md transition hover:border-emerald-200">
-                  <div className="bg-gray-50 text-gray-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center font-extrabold border border-gray-200 flex-shrink-0 mr-5">
-                    <span className="text-xs uppercase tracking-widest text-gray-500">{monthNames[currentMonth].substring(0,3)}</span>
-                    <span className="text-2xl leading-none">12</span>
-                  </div>
-                  <div>
-                    <h4 className="font-extrabold text-gray-900 text-lg">Penyaluran BLT Tahap Lanjutan</h4>
-                    <p className="text-gray-600 text-sm mt-1 font-medium flex items-center"><MapPin className="w-4 h-4 mr-1 text-gray-400"/> Balai Desa Upang Mulya</p>
-                  </div>
-                </div>
-
-                {/* Agenda Item 3 */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 flex items-start hover:shadow-md transition hover:border-emerald-200">
-                  <div className="bg-gray-50 text-gray-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center font-extrabold border border-gray-200 flex-shrink-0 mr-5">
-                    <span className="text-xs uppercase tracking-widest text-gray-500">{monthNames[currentMonth].substring(0,3)}</span>
-                    <span className="text-2xl leading-none">28</span>
-                  </div>
-                  <div>
-                    <h4 className="font-extrabold text-gray-900 text-lg">Musyawarah Perencanaan Pembangunan</h4>
-                    <p className="text-gray-600 text-sm mt-1 font-medium flex items-center"><MapPin className="w-4 h-4 mr-1 text-gray-400"/> Balai Desa Upang Mulya</p>
-                  </div>
-                </div>
+            <div className="w-full lg:w-1/2 flex flex-col">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-extrabold text-gray-900 flex items-center">
+                   <Activity className="w-6 h-6 text-emerald-600 mr-3" />
+                   Agenda Bulan Ini
+                </h3>
+                {isAdmin && (
+                  <button onClick={() => openEditorAgenda()} className="text-sm bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1.5 rounded-lg font-bold flex items-center transition shadow-sm">
+                    <Plus className="w-4 h-4 mr-1" /> Tambah Agenda
+                  </button>
+                )}
               </div>
-              <div className="mt-6">
+              
+              <div className="space-y-4 flex-grow overflow-y-auto custom-scrollbar pr-2 max-h-[380px]">
+                {agendaBulanIni.length === 0 ? (
+                   <div className="text-gray-500 italic py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">Belum ada agenda pada bulan ini.</div>
+                ) : (
+                  agendaBulanIni.map((agenda: any) => {
+                    const d = new Date(agenda.tanggal);
+                    const tgl = String(d.getDate()).padStart(2, '0');
+                    return (
+                      <div key={agenda.id} className="bg-white border border-gray-200 rounded-2xl p-5 flex items-start hover:shadow-md transition hover:border-emerald-200 relative group">
+                        {isAdmin && (
+                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => openEditorAgenda(agenda)} className="p-1.5 text-amber-500 hover:bg-amber-50 rounded-md transition" title="Edit Agenda"><Edit className="w-4 h-4"/></button>
+                            <button onClick={() => handleDeleteAgenda(agenda.id)} className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md transition" title="Hapus Agenda"><Trash2 className="w-4 h-4"/></button>
+                          </div>
+                        )}
+                        <div className="bg-emerald-50 text-emerald-700 w-16 h-16 rounded-xl flex flex-col items-center justify-center font-extrabold shadow-sm border border-emerald-100 flex-shrink-0 mr-5">
+                          <span className="text-xs uppercase tracking-widest text-emerald-500">{monthNames[d.getMonth()].substring(0,3)}</span>
+                          <span className="text-2xl leading-none">{tgl}</span>
+                        </div>
+                        <div className="pr-12">
+                          <h4 className="font-extrabold text-gray-900 text-lg leading-tight">{agenda.judul}</h4>
+                          <p className="text-gray-600 text-sm mt-1.5 font-medium flex items-center"><MapPin className="w-4 h-4 mr-1 text-emerald-500"/> {agenda.lokasi}</p>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+              
+              <div className="mt-6 pt-4 border-t border-gray-100">
                 <button onClick={() => navigateTo('berita', 'list-berita')} className="text-emerald-600 font-extrabold hover:text-emerald-800 flex items-center transition group">
                    Lihat semua kegiatan <ArrowRight className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition" />
                 </button>
@@ -1637,6 +1699,60 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
                 </button>
                 <button type="submit" className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5">
                   <Save className="w-5 h-5 mr-2" /> Simpan Perubahan Beranda
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Editor Khusus Data Agenda */}
+      {showEditorAgenda && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in-95 border border-emerald-100">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-extrabold text-gray-900 flex items-center tracking-tight">
+                <CalendarDays className="w-6 h-6 mr-2 text-emerald-600" /> 
+                {editDataAgenda.id ? 'Edit Agenda' : 'Tambah Agenda Baru'}
+              </h3>
+              <button onClick={() => setShowEditorAgenda(false)} className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSaveAgenda} className="space-y-5">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Nama Kegiatan</label>
+                <input 
+                  type="text" required
+                  value={editDataAgenda.judul}
+                  onChange={(e) => setEditDataAgenda({...editDataAgenda, judul: e.target.value})}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Lokasi / Tempat</label>
+                <input 
+                  type="text" required
+                  value={editDataAgenda.lokasi}
+                  onChange={(e) => setEditDataAgenda({...editDataAgenda, lokasi: e.target.value})}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Tanggal Pelaksanaan</label>
+                <input 
+                  type="date" required
+                  value={editDataAgenda.tanggal}
+                  onChange={(e) => setEditDataAgenda({...editDataAgenda, tanggal: e.target.value})}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium" 
+                />
+              </div>
+              
+              <div className="flex justify-end gap-3 pt-4">
+                <button type="button" onClick={() => setShowEditorAgenda(false)} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition">Batal</button>
+                <button type="submit" className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 flex items-center">
+                  <Save className="w-4 h-4 mr-2" /> Simpan Agenda
                 </button>
               </div>
             </form>
