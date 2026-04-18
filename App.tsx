@@ -38,7 +38,9 @@ if (typeof window !== 'undefined') {
     appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-upang-mulya';
     
     // Prioritaskan config bawaan sistem jika tersedia
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfigManual;
+    const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config 
+                           ? JSON.parse(__firebase_config) 
+                           : firebaseConfigManual;
     
     if (firebaseConfig && Object.keys(firebaseConfig).length > 0) {
       app = initializeApp(firebaseConfig);
@@ -192,7 +194,6 @@ const initialKeuangan = [
 export default function App() {
   const [user, setUser] = useState<any>(null);
   const [isDbConnected, setIsDbConnected] = useState(false); 
-  const [dbError, setDbError] = useState("");
   const [currentPage, setCurrentPage] = useState('beranda');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -269,7 +270,8 @@ export default function App() {
           await signInAnonymously(auth);
         }
       } catch (error: any) {
-        // Abaikan error konfigurasi agar aplikasi tidak crash
+        // Silently catch auth errors to prevent UI disruption
+        console.warn("Auth Init:", error.code);
       }
     };
     initAuth();
@@ -286,11 +288,10 @@ export default function App() {
 
   // ================= FETCH DATA =================
   useEffect(() => {
-    if (!db || !user) return; // CRITICAL: Only fetch if authenticated
+    if (!db || !user) return; 
 
     const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
       setIsDbConnected(true); 
-      setDbError(""); 
       if (snap.exists()) {
         const val = snap.data().value;
         const parsedData = typeof val === 'string' ? JSON.parse(val) : val;
@@ -301,9 +302,7 @@ export default function App() {
 
     const handleServerError = (err: any) => {
       setIsDbConnected(false);
-      if (err.code === 'permission-denied') {
-        setDbError("Akses Database Ditolak! Anda belum mengubah Rules Firestore menjadi public.");
-      }
+      console.warn("Sync error:", err.code);
     };
 
     const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_beranda', 'main'), (snap) => handleServerData(snap, setDataBeranda, 'desa_beranda_upang'), handleServerError);
@@ -699,13 +698,6 @@ export default function App() {
            {isDbConnected && (
              <div className="bg-emerald-200 text-emerald-800 border border-emerald-400 px-3 py-1 rounded-full text-xs font-bold">
                ✅ Status Database: ONLINE (Tersinkronisasi dengan Server).
-             </div>
-           )}
-
-           {dbError && (
-             <div className="bg-rose-200 text-rose-800 border border-rose-400 px-4 py-2 rounded-xl text-xs font-bold w-full max-w-2xl mt-1 text-left sm:text-center">
-               ⚠️ {dbError} <br/>
-               <span className="font-normal">Masuk ke <b>Firebase Console</b> Anda, buka menu <b>Firestore Database</b>, klik tab <b>'Rules'</b>, lalu ubah isinya menjadi <br/> <code className="bg-white/50 px-1 rounded">allow read, write: if true;</code> dan klik <b>Publish</b>.</span>
              </div>
            )}
         </div>
@@ -1165,30 +1157,20 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
                    <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Bagian Sambutan
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap Kepala Desa</label>
-                    <input type="text" required value={editForm.namaKades} onChange={(e) => setEditForm({...editForm, namaKades: e.target.value})} className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Jabatan (Teks)</label>
-                    <input type="text" required value={editForm.jabatanKades} onChange={(e) => setEditForm({...editForm, jabatanKades: e.target.value})} className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" />
-                  </div>
+                  <div><label className="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap Kepala Desa</label><input type="text" required value={editForm.namaKades} onChange={(e) => setEditForm({...editForm, namaKades: e.target.value})} className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" /></div>
+                  <div><label className="block text-sm font-bold text-gray-700 mb-2">Jabatan (Teks)</label><input type="text" required value={editForm.jabatanKades} onChange={(e) => setEditForm({...editForm, jabatanKades: e.target.value})} className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" /></div>
                   <div className="col-span-full">
                     <label className="block text-sm font-bold text-gray-700 mb-3">Foto Kepala Desa</label>
                     <div className="flex items-center gap-5">
                       <img src={editForm.fotoKades} alt="Preview Kades" className="w-24 h-24 object-cover rounded-xl shadow-sm border border-gray-300" />
                       <div className="flex-1">
                         <label className="cursor-pointer bg-white text-emerald-700 border-2 border-emerald-200 hover:bg-emerald-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
-                          <Upload className="w-5 h-5 mr-2" /> Ganti Foto
-                          <input type="file" accept="image/*" className="hidden" onChange={handleFotoKadesUpload} />
+                          <Upload className="w-5 h-5 mr-2" /> Ganti Foto<input type="file" accept="image/*" className="hidden" onChange={handleFotoKadesUpload} />
                         </label>
                       </div>
                     </div>
                   </div>
-                  <div className="col-span-full">
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Isi Pesan Sambutan</label>
-                    <textarea required rows={6} value={editForm.sambutanKades} onChange={(e) => setEditForm({...editForm, sambutanKades: e.target.value})} className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium leading-relaxed"></textarea>
-                  </div>
+                  <div className="col-span-full"><label className="block text-sm font-bold text-gray-700 mb-2">Pesan Sambutan</label><textarea required rows={6} value={editForm.sambutanKades} onChange={(e) => setEditForm({...editForm, sambutanKades: e.target.value})} className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium leading-relaxed"></textarea></div>
                 </div>
               </div>
 
@@ -1569,7 +1551,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   const OrgCard = ({ data }: { data: any }) => {
     const isKosong = !data || data.jabatan === 'KOSONG';
     return (
-      <div className="flex flex-col items-center bg-white border border-[#0284c7] w-[160px] h-[135px] shadow-sm group relative">
+      <div className="flex flex-col items-center bg-white border border-[#0284c7] w-[150px] sm:w-[170px] shadow-sm group relative z-10 pb-2">
         {!isKosong && isAdmin && (
           <div className="absolute -top-10 -right-2 z-20 hidden group-hover:flex gap-1 bg-white p-1 rounded-lg shadow-lg border">
             <button onClick={() => openEditorPerangkat(data)} className="p-1 text-amber-500 hover:bg-amber-50 rounded"><Edit className="w-4 h-4"/></button>
@@ -1579,37 +1561,31 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
         <div className="bg-[#0284c7] text-white font-bold text-[9px] w-full text-center py-1 px-1 uppercase min-h-[32px] flex items-center justify-center leading-tight">
            {data?.jabatan || 'KOSONG'}
         </div>
-        <div className="p-2 pb-0">
+        <div className="p-2 pb-0 mt-1">
           <div className="w-[50px] h-[50px] rounded-full overflow-hidden border border-gray-200 mx-auto bg-gray-100">
              <img src={data?.foto || "https://images.unsplash.com/photo-1552058544-f2b08422138a?w=100&q=80"} alt={data?.nama} className="w-full h-full object-cover"/>
           </div>
         </div>
-        <div className="font-extrabold text-[10px] text-gray-800 text-center uppercase px-2 mt-2 break-words w-full line-clamp-2 leading-tight">
+        <div className="font-extrabold text-[10px] sm:text-[11px] text-gray-800 text-center uppercase px-2 mt-2 break-words w-full line-clamp-2 leading-tight min-h-[30px] flex items-center justify-center">
           {data?.nama || '-'}
         </div>
       </div>
     );
   };
 
-  // Garis Penghubung Absolut (Agar presisi seperti screenshot)
-  const AbsLine = ({ top, left, w, h, arrow }: any) => (
-    <div className="absolute bg-[#0284c7] z-0" style={{ top: `${top}px`, left: `${left}px`, width: `${w}px`, height: `${h}px` }}>
-       {arrow && <div className="absolute -bottom-[2px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[7px] border-t-[#0284c7]"></div>}
-    </div>
-  );
-
-  const AbsoluteCard = ({ data, left, top }: { data: any, left: number, top: number }) => (
-     <div className="absolute z-10" style={{ left: `${left}px`, top: `${top}px` }}>
-        <OrgCard data={data} />
-     </div>
-  );
-
-  // Filter Data Perangkat berdasarkan posisi dari screenshot
+  // Filter Data Perangkat
   const kades = daftarPerangkat.find((p:any) => p.kategori_jabatan === 'KADES');
   const sekdes = daftarPerangkat.find((p:any) => p.kategori_jabatan === 'SEKDES');
   const kesis = daftarPerangkat.filter((p:any) => p.kategori_jabatan === 'KASI');
   const kaurs = daftarPerangkat.filter((p:any) => p.kategori_jabatan === 'KAUR');
   const kaduses = daftarPerangkat.filter((p:any) => p.kategori_jabatan === 'KADUS');
+
+  // Helper untuk tanda panah ke bawah
+  const DropLine = ({ h = "20px", isArrow = true }) => (
+    <div className={`absolute top-0 w-[2px] bg-[#0088cc] -translate-x-1/2 flex flex-col items-center justify-end`} style={{ height: h }}>
+      {isArrow && <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-[#0088cc] absolute -bottom-[4px]"></div>}
+    </div>
+  );
 
   // ----- LOGIC LEMBAGA -----
   const filteredLembaga = daftarLembaga.filter((l: any) => l.kategori === activeTab);
@@ -1640,7 +1616,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
           <div className="w-24 h-1.5 bg-gradient-to-r from-sky-600 to-sky-400 mx-auto rounded-full mt-6"></div>
         </div>
 
-        {/* =========== TAMPILAN PERANGKAT DESA (ORG CHART ABSOLUTE KORDINAT) =========== */}
+        {/* =========== TAMPILAN PERANGKAT DESA (ORG CHART DENGAN FLEX & PERSENTASE - RESPONSIVE & RAPI) =========== */}
         {isPerangkat && (
           <div className="w-full overflow-x-auto pb-10 bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
              {isAdmin && (
@@ -1651,48 +1627,81 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
               </div>
              )}
 
-             {/* Area Kordinat Fix untuk Mencegah Tabrakan Garis/Kotak */}
-             <div className="min-w-[1100px] h-[740px] relative mx-auto bg-white overflow-hidden">
-                {/* KADES */}
-                <AbsoluteCard data={kades} left={470} top={0} />
+             <div className="min-w-[1200px] flex flex-col items-center relative mx-auto pt-4 pb-10">
+                {/* 1. KADES */}
+                <div className="flex justify-center z-10 relative">
+                   <OrgCard data={kades} />
+                   <div className="absolute top-[100%] left-1/2 w-[2px] h-[30px] bg-[#0088cc] -translate-x-1/2 z-0"></div>
+                </div>
 
-                {/* GARIS VERTIKAL UTAMA (Di bawah Kades) */}
-                <AbsLine left={549} top={135} w={2} h={415} />
+                {/* 2. ROW SEKDES */}
+                <div className="w-full max-w-[500px] flex mt-[30px] relative z-0">
+                   {/* Center V-Line Continues */}
+                   <div className="absolute top-0 left-1/2 w-[2px] h-full bg-[#0088cc] -translate-x-1/2"></div>
+                   
+                   {/* H-Line Branch to Right */}
+                   <div className="w-1/2"></div>
+                   <div className="w-1/2 border-t-[2px] border-[#0088cc] relative">
+                      {/* Drop to Sekdes */}
+                      <DropLine h="25px" />
+                   </div>
+                </div>
 
-                {/* GARIS KE SEKDES (Cabang Kanan) */}
-                <AbsLine left={550} top={155} w={300} h={2} /> {/* Horizontal ke kanan */}
-                <AbsLine left={849} top={155} w={2} h={15} arrow /> {/* Turun ke Sekdes */}
-                <AbsoluteCard data={sekdes} left={770} top={170} />
+                {/* Container for Sekdes (Pulled slightly left with negative margin for layout balance) */}
+                <div className="w-full max-w-[500px] flex justify-end relative z-10 mt-[25px]">
+                   {/* Keep Center V-Line running behind */}
+                   <div className="absolute top-[-25px] left-1/2 w-[2px] h-[160px] bg-[#0088cc] -translate-x-1/2 z-[-1]"></div>
+                   
+                   <div className="flex justify-center w-1/2">
+                     <OrgCard data={sekdes} />
+                   </div>
+                </div>
 
-                {/* GARIS KE KASI (Cabang Kiri) */}
-                <AbsLine left={150} top={350} w={400} h={2} /> {/* Horizontal kiri dari tengah */}
-                <AbsLine left={149} top={350} w={2} h={20} arrow /> {/* Drop Kasi 1 */}
-                <AbsLine left={349} top={350} w={2} h={20} arrow /> {/* Drop Kasi 2 */}
-                <AbsLine left={549} top={350} w={2} h={20} arrow /> {/* Drop Kasi 3 */}
-                <AbsoluteCard data={kesis[0]} left={70} top={370} />
-                <AbsoluteCard data={kesis[1]} left={270} top={370} />
-                <AbsoluteCard data={kesis[2]} left={470} top={370} />
+                {/* 3. ROW KASI & KAUR */}
+                {/* Long Horizontal Line */}
+                <div className="w-[85%] border-t-[2px] border-[#0088cc] relative mt-[35px] z-0">
+                   {/* Connectors down */}
+                   <div className="absolute left-[0%]"><DropLine h="30px" /></div>
+                   <div className="absolute left-[20%]"><DropLine h="30px" /></div>
+                   <div className="absolute left-[40%]"><DropLine h="30px" /></div>
+                   
+                   <div className="absolute left-[60%]"><DropLine h="30px" /></div>
+                   <div className="absolute left-[80%]"><DropLine h="30px" /></div>
+                   <div className="absolute left-[100%]"><DropLine h="30px" /></div>
 
-                {/* GARIS KE KAUR (Cabang di bawah Sekdes) */}
-                <AbsLine left={849} top={305} w={2} h={45} /> {/* Turun dari Sekdes */}
-                <AbsLine left={650} top={350} w={400} h={2} /> {/* Horizontal Kaur */}
-                <AbsLine left={649} top={350} w={2} h={20} arrow /> {/* Drop Kaur 1 */}
-                <AbsLine left={849} top={350} w={2} h={20} arrow /> {/* Drop Kaur 2 */}
-                <AbsLine left={1049} top={350} w={2} h={20} arrow /> {/* Drop Kaur 3 */}
-                <AbsoluteCard data={kaurs[0]} left={570} top={370} />
-                <AbsoluteCard data={kaurs[1]} left={770} top={370} />
-                <AbsoluteCard data={kaurs[2]} left={970} top={370} />
+                   {/* Center V-Line continues down past Kasi/Kaur */}
+                   <div className="absolute top-0 left-1/2 w-[2px] h-[220px] bg-[#0088cc] -translate-x-1/2 z-0"></div>
+                </div>
 
-                {/* GARIS KE KADUS (Paling Bawah) */}
-                <AbsLine left={250} top={550} w={600} h={2} /> {/* Horizontal Kadus */}
-                <AbsLine left={249} top={550} w={2} h={20} arrow /> {/* Drop Kadus 1 */}
-                <AbsLine left={449} top={550} w={2} h={20} arrow /> {/* Drop Kadus 2 */}
-                <AbsLine left={649} top={550} w={2} h={20} arrow /> {/* Drop Kadus 3 */}
-                <AbsLine left={849} top={550} w={2} h={20} arrow /> {/* Drop Kadus 4 */}
-                <AbsoluteCard data={kaduses[0]} left={170} top={570} />
-                <AbsoluteCard data={kaduses[1]} left={370} top={570} />
-                <AbsoluteCard data={kaduses[2]} left={570} top={570} />
-                <AbsoluteCard data={kaduses[3]} left={770} top={570} />
+                {/* The 6 Cards */}
+                <div className="w-[85%] flex justify-between mt-[30px] relative z-10">
+                   <div className="flex justify-center absolute left-[0%] -translate-x-1/2"><OrgCard data={kesis[0]} /></div>
+                   <div className="flex justify-center absolute left-[20%] -translate-x-1/2"><OrgCard data={kesis[1]} /></div>
+                   <div className="flex justify-center absolute left-[40%] -translate-x-1/2"><OrgCard data={kesis[2]} /></div>
+
+                   <div className="flex justify-center absolute left-[60%] -translate-x-1/2"><OrgCard data={kaurs[0]} /></div>
+                   <div className="flex justify-center absolute left-[80%] -translate-x-1/2"><OrgCard data={kaurs[1]} /></div>
+                   <div className="flex justify-center absolute left-[100%] -translate-x-1/2"><OrgCard data={kaurs[2]} /></div>
+                </div>
+
+                {/* 4. ROW KADUS */}
+                {/* H-Line for Kadus (Attached to the center V-Line that continued) */}
+                <div className="w-[60%] border-t-[2px] border-[#0088cc] relative mt-[190px] z-0">
+                   {/* Connectors down */}
+                   <div className="absolute left-[0%]"><DropLine h="30px" /></div>
+                   <div className="absolute left-[33.33%]"><DropLine h="30px" /></div>
+                   <div className="absolute left-[66.66%]"><DropLine h="30px" /></div>
+                   <div className="absolute left-[100%]"><DropLine h="30px" /></div>
+                </div>
+
+                {/* 4 Kadus Cards */}
+                <div className="w-[60%] flex justify-between mt-[30px] relative z-10 mb-20">
+                   <div className="flex justify-center absolute left-[0%] -translate-x-1/2"><OrgCard data={kaduses[0]} /></div>
+                   <div className="flex justify-center absolute left-[33.33%] -translate-x-1/2"><OrgCard data={kaduses[1]} /></div>
+                   <div className="flex justify-center absolute left-[66.66%] -translate-x-1/2"><OrgCard data={kaduses[2]} /></div>
+                   <div className="flex justify-center absolute left-[100%] -translate-x-1/2"><OrgCard data={kaduses[3]} /></div>
+                </div>
+
              </div>
           </div>
         )}
