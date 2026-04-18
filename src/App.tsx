@@ -1776,7 +1776,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
 
   // Desain Card Perangkat Persis Screenshot
   const PerangkatCard = ({ p }: any) => (
-    <div className="bg-white border-[3px] border-black overflow-hidden relative w-[160px] flex flex-col items-center shadow-lg group">
+    <div className="bg-white border-[3px] border-black overflow-hidden relative w-[160px] h-[260px] flex flex-col items-center shadow-lg group">
        {isAdmin && (
          <div className="absolute top-1 right-1 z-20 flex gap-1 bg-white/90 p-1 rounded backdrop-blur border border-black">
            <button onClick={() => openEditorPerangkat(p)} className="text-amber-600 hover:text-amber-800 p-1"><Edit className="w-3.5 h-3.5" /></button>
@@ -1784,7 +1784,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
          </div>
        )}
        
-       <div className="w-full h-[180px] bg-red-600 border-b-[3px] border-black">
+       <div className="w-full h-[180px] bg-red-600 border-b-[3px] border-black flex-shrink-0">
           <img 
             src={p.foto} 
             alt={p.nama} 
@@ -1796,8 +1796,8 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
             }} 
           />
        </div>
-       <div className="p-3 text-center w-full bg-white flex flex-col items-center justify-center min-h-[70px]">
-          <h3 className="text-[13px] font-black text-black leading-tight mb-1 underline uppercase text-center">{p.nama}</h3>
+       <div className="p-3 text-center w-full bg-white flex-grow flex flex-col items-center justify-center">
+          <h3 className="text-[13px] font-black text-black leading-tight mb-1 underline uppercase text-center line-clamp-2">{p.nama}</h3>
           <span className="text-[11px] font-bold text-black uppercase text-center leading-tight">{p.jabatan}</span>
        </div>
     </div>
@@ -1820,7 +1820,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
           </p>
         </div>
 
-        {/* =========== TAMPILAN PERANGKAT DESA (HIERARKI BAGAN) =========== */}
+        {/* =========== TAMPILAN PERANGKAT DESA (HIERARKI BAGAN ABSOLUTE) =========== */}
         {isPerangkat && (
           <div className="animate-in fade-in duration-500 max-w-full">
             {isAdmin && (
@@ -1838,85 +1838,91 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg max-w-6xl mx-auto">Belum ada data perangkat desa.</div>
             ) : (
               <div className="w-full overflow-x-auto pb-10 custom-scrollbar">
-                <div className="min-w-[1300px] w-max mx-auto relative pt-10 flex flex-col items-center">
+                {/* Wadah Absolut untuk struktur berjenjang yang presisi */}
+                <div className="w-[1400px] h-[1250px] relative mx-auto mt-10 bg-white/50 rounded-3xl">
+
+                  {/* --- GARIS PENGHUBUNG (CONNECTOR LINES) --- */}
                   
-                  {/* TIER 1: BPD & KADES */}
-                  <div className="relative w-full flex justify-center mb-[60px]">
-                     {/* BPD BOX */}
-                     <div className="absolute left-[15%] top-[80px] flex items-center">
-                        <div className="bg-white border-[3px] border-black font-black text-2xl px-10 py-6 z-10 shadow-md">BPD</div>
-                        {/* Garis Putus-Putus BPD ke KADES */}
-                        <div className="w-[300px] border-b-[4px] border-dashed border-black"></div>
-                     </div>
+                  {/* Garis BPD ke Kades */}
+                  <div className="absolute top-[125px] left-[230px] w-[190px] border-t-[4px] border-dashed border-black z-0"></div>
+                  
+                  {/* Batang Utama (Trunk) vertikal dari Kades turun ke bawah */}
+                  <div className="absolute left-[498px] top-[260px] w-1 h-[60px] bg-black z-0"></div>
+                  <div className="absolute left-[498px] top-[320px] w-1 h-[130px] bg-black z-0"></div>
+                  <div className="absolute left-[498px] top-[450px] w-1 h-[450px] bg-black z-0"></div>
 
-                     {/* KADES */}
-                     <div className="relative z-10">
-                        {kadesList.map((p: any) => <PerangkatCard key={p.id} p={p} />)}
-                     </div>
+                  {/* Cabang Sekdes (Kanan) */}
+                  <div className="absolute left-[500px] top-[320px] w-[500px] h-1 bg-black z-0"></div>
+                  <div className="absolute left-[998px] top-[320px] w-1 h-[30px] bg-black z-0"></div>
+                  {/* Sambungan bawah Sekdes menuju Kaur */}
+                  <div className="absolute left-[998px] top-[610px] w-1 h-[40px] bg-black z-0"></div>
 
-                     {/* TANGKAI UTAMA VERTIKAL - MULAI */}
-                     <div className="absolute top-[256px] left-1/2 w-1 h-[60px] bg-black -translate-x-1/2 z-0"></div>
+                  {/* Cabang Kasi (Kiri) */}
+                  <div className="absolute left-[100px] top-[450px] w-[400px] h-1 bg-black z-0"></div>
+                  <div className="absolute left-[98px] top-[450px] w-1 h-[40px] bg-black z-0"></div>
+                  <div className="absolute left-[298px] top-[450px] w-1 h-[40px] bg-black z-0"></div>
+                  {/* Kasi 3 bergantung pada Batang Utama yang melintas, jadi tidak butuh garis drop tambahan */}
+
+                  {/* Cabang Kaur (Kanan Bawah Sekdes) */}
+                  <div className="absolute left-[700px] top-[650px] w-[600px] h-1 bg-black z-0"></div>
+                  <div className="absolute left-[698px] top-[650px] w-1 h-[40px] bg-black z-0"></div>
+                  <div className="absolute left-[998px] top-[650px] w-1 h-[40px] bg-black z-0"></div>
+                  <div className="absolute left-[1298px] top-[650px] w-1 h-[40px] bg-black z-0"></div>
+
+                  {/* Cabang Kasun (Paling Bawah) */}
+                  <div className="absolute left-[250px] top-[900px] w-[500px] h-1 bg-black z-0"></div>
+                  <div className="absolute left-[248px] top-[900px] w-1 h-[40px] bg-black z-0"></div>
+                  <div className="absolute left-[498px] top-[900px] w-1 h-[40px] bg-black z-0"></div>
+                  <div className="absolute left-[748px] top-[900px] w-1 h-[40px] bg-black z-0"></div>
+
+                  {/* --- KARTU PERANGKAT DESA (NODES) --- */}
+                  
+                  {/* Kotak BPD (Statis) */}
+                  <div className="absolute left-[70px] top-[85px] w-[160px] h-[80px] bg-white border-[3px] border-black flex items-center justify-center font-black text-2xl shadow-lg z-10 tracking-widest">
+                    BPD
                   </div>
 
-                  {/* TIER 2 & 3: KASI, SEKDES, KAUR */}
-                  <div className="relative w-full min-h-[500px] flex justify-between px-[5%]">
-                     
-                     {/* TANGKAI UTAMA VERTIKAL - LANJUTAN KE BAWAH */}
-                     <div className="absolute top-0 left-1/2 w-1 h-full bg-black -translate-x-1/2 z-0"></div>
-
-                     {/* GARIS HORIZONTAL KASI KE SEKDES */}
-                     <div className="absolute top-0 left-[18%] right-[25%] h-1 bg-black z-0"></div>
-
-                     {/* KIRI: DAFTAR KASI */}
-                     <div className="w-[45%] flex justify-between pr-[8%]">
-                        {kasiList.map((p: any) => (
-                           <div key={p.id} className="relative pt-8">
-                               <div className="absolute top-0 left-1/2 w-1 h-8 bg-black -translate-x-1/2 z-0"></div>
-                               <PerangkatCard p={p} />
-                           </div>
-                        ))}
-                     </div>
-
-                     {/* KANAN: SEKDES & DAFTAR KAUR */}
-                     <div className="w-[45%] relative flex flex-col items-center pl-[5%]">
-                        {/* SEKDES */}
-                        <div className="relative pt-8 w-full flex justify-center">
-                           <div className="absolute top-0 left-1/2 w-1 h-8 bg-black -translate-x-1/2 z-0"></div>
-                           {sekdesList.map((p: any) => <PerangkatCard key={p.id} p={p} />)}
-                           
-                           {/* Tangkai dari Sekdes turun ke Kaur */}
-                           <div className="absolute top-full left-1/2 w-1 h-[60px] bg-black -translate-x-1/2 z-0"></div>
-                        </div>
-
-                        {/* KAUR */}
-                        <div className="relative mt-[60px] w-[130%] flex justify-between">
-                           {/* Garis Horizontal Kaur */}
-                           <div className="absolute top-0 left-[15%] right-[15%] h-1 bg-black z-0"></div>
-                           {kaurList.map((p: any) => (
-                              <div key={p.id} className="relative pt-8">
-                                 <div className="absolute top-0 left-1/2 w-1 h-8 bg-black -translate-x-1/2 z-0"></div>
-                                 <PerangkatCard p={p} />
-                              </div>
-                           ))}
-                        </div>
-                     </div>
-
+                  {/* Level 1: Kepala Desa */}
+                  <div className="absolute left-[420px] top-0 z-10">
+                    {kadesList[0] && <PerangkatCard p={kadesList[0]} />}
                   </div>
 
-                  {/* TIER 4: KASUN (BAWAH TENGAH) */}
-                  <div className="relative w-full flex justify-center mt-[-30px]">
-                     <div className="w-[60%] flex justify-between relative pt-10">
-                        {/* Garis Horizontal Kasun */}
-                        <div className="absolute top-0 left-[10%] right-[10%] h-1 bg-black z-0"></div>
-                        
-                        {kasunList.map((p: any, idx: number) => (
-                           <div key={p.id} className="relative">
-                              {/* Sambungan vertikal untuk semua Kasun ke garis horizontal */}
-                              <div className="absolute top-[-40px] left-1/2 w-1 h-10 bg-black -translate-x-1/2 z-0"></div>
-                              <PerangkatCard p={p} />
-                           </div>
-                        ))}
-                     </div>
+                  {/* Level 2: Sekretaris Desa */}
+                  <div className="absolute left-[920px] top-[350px] z-10">
+                    {sekdesList[0] && <PerangkatCard p={sekdesList[0]} />}
+                  </div>
+
+                  {/* Level 3: Kasi (Kiri) */}
+                  <div className="absolute left-[20px] top-[490px] z-10">
+                    {kasiList[0] && <PerangkatCard p={kasiList[0]} />}
+                  </div>
+                  <div className="absolute left-[220px] top-[490px] z-10">
+                    {kasiList[1] && <PerangkatCard p={kasiList[1]} />}
+                  </div>
+                  <div className="absolute left-[420px] top-[490px] z-10">
+                    {kasiList[2] && <PerangkatCard p={kasiList[2]} />}
+                  </div>
+
+                  {/* Level 3: Kaur (Kanan) */}
+                  <div className="absolute left-[620px] top-[690px] z-10">
+                    {kaurList[0] && <PerangkatCard p={kaurList[0]} />}
+                  </div>
+                  <div className="absolute left-[920px] top-[690px] z-10">
+                    {kaurList[1] && <PerangkatCard p={kaurList[1]} />}
+                  </div>
+                  <div className="absolute left-[1220px] top-[690px] z-10">
+                    {kaurList[2] && <PerangkatCard p={kaurList[2]} />}
+                  </div>
+
+                  {/* Level 4: Kasun (Bawah Tengah) */}
+                  <div className="absolute left-[170px] top-[940px] z-10">
+                    {kasunList[0] && <PerangkatCard p={kasunList[0]} />}
+                  </div>
+                  <div className="absolute left-[420px] top-[940px] z-10">
+                    {kasunList[1] && <PerangkatCard p={kasunList[1]} />}
+                  </div>
+                  <div className="absolute left-[670px] top-[940px] z-10">
+                    {kasunList[2] && <PerangkatCard p={kasunList[2]} />}
                   </div>
 
                 </div>
