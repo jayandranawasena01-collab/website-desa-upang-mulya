@@ -281,7 +281,7 @@ export default function App() {
         }
       } catch (error: any) {
         console.error("Auth error:", error.message);
-        if (error.code === 'auth/operation-not-allowed') {
+        if (error.code === 'auth/operation-not-allowed' || error.code === 'auth/configuration-not-found') {
           setDbError("Autentikasi Firebase gagal. Pastikan metode 'Anonymous Login' sudah Anda aktifkan di menu Authentication Firebase Console.");
         } else {
           setDbError(`Firebase Error: ${error.message}`);
@@ -324,7 +324,7 @@ export default function App() {
       console.error("Gagal sinkronisasi data:", err);
       setIsDbConnected(false);
       if (err.code === 'permission-denied') {
-        setDbError("Akses Database Ditolak! Anda belum mengubah Rules Firestore menjadi public.");
+        setDbError("Akses Database Ditolak! Masuk ke Firebase Console Anda, buka menu Firestore Database, klik tab 'Rules', lalu ubah isinya menjadi 'allow read, write: if true;' dan klik Publish.");
       }
     };
 
@@ -920,9 +920,8 @@ export default function App() {
            )}
 
            {dbError && (
-             <div className="bg-rose-200 text-rose-800 border border-rose-400 px-4 py-2 rounded-xl text-xs font-bold w-full max-w-2xl mt-1 text-left sm:text-center">
-               ⚠️ {dbError} <br/>
-               <span className="font-normal">Masuk ke <b>Firebase Console</b> Anda, buka menu <b>Firestore Database</b>, klik tab <b>'Rules'</b>, lalu ubah isinya menjadi <br/> <code className="bg-white/50 px-1 rounded">allow read, write: if true;</code> dan klik <b>Publish</b>.</span>
+             <div className="bg-rose-200 text-rose-800 border border-rose-400 px-4 py-2 rounded-xl text-xs font-bold w-full max-w-2xl mt-1 text-left sm:text-center shadow-sm">
+               ⚠️ {dbError}
              </div>
            )}
         </div>
