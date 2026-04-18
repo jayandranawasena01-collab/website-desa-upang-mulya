@@ -1776,7 +1776,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
 
   // Desain Card Perangkat Persis Screenshot
   const PerangkatCard = ({ p }: any) => (
-    <div className="bg-white border-[3px] border-black overflow-hidden relative w-[160px] h-[260px] flex flex-col items-center shadow-lg group">
+    <div style={{ width: '160px', height: '260px' }} className="bg-white border-[3px] border-black overflow-hidden relative flex flex-col items-center shadow-lg group z-10">
        {isAdmin && (
          <div className="absolute top-1 right-1 z-20 flex gap-1 bg-white/90 p-1 rounded backdrop-blur border border-black">
            <button onClick={() => openEditorPerangkat(p)} className="text-amber-600 hover:text-amber-800 p-1"><Edit className="w-3.5 h-3.5" /></button>
@@ -1784,7 +1784,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
          </div>
        )}
        
-       <div className="w-full h-[180px] bg-red-600 border-b-[3px] border-black flex-shrink-0">
+       <div style={{ height: '180px' }} className="w-full bg-red-600 border-b-[3px] border-black flex-shrink-0">
           <img 
             src={p.foto} 
             alt={p.nama} 
@@ -1796,9 +1796,9 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
             }} 
           />
        </div>
-       <div className="p-3 text-center w-full bg-white flex-grow flex flex-col items-center justify-center">
-          <h3 className="text-[13px] font-black text-black leading-tight mb-1 underline uppercase text-center line-clamp-2">{p.nama}</h3>
-          <span className="text-[11px] font-bold text-black uppercase text-center leading-tight">{p.jabatan}</span>
+       <div className="p-2 text-center w-full bg-white flex-grow flex flex-col items-center justify-center">
+          <h3 className="text-[12px] font-black text-black leading-tight mb-1 underline uppercase text-center line-clamp-2">{p.nama}</h3>
+          <span className="text-[10px] font-bold text-black uppercase text-center leading-tight line-clamp-2">{p.jabatan}</span>
        </div>
     </div>
   );
@@ -1839,89 +1839,92 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
             ) : (
               <div className="w-full overflow-x-auto pb-10 custom-scrollbar">
                 {/* Wadah Absolut untuk struktur berjenjang yang presisi */}
-                <div className="w-[1400px] h-[1250px] relative mx-auto mt-10 bg-white/50 rounded-3xl">
+                <div style={{ width: '1300px', height: '1300px', position: 'relative', margin: '0 auto', marginTop: '40px' }} className="bg-white/50 rounded-3xl">
 
                   {/* --- GARIS PENGHUBUNG (CONNECTOR LINES) --- */}
                   
                   {/* Garis BPD ke Kades */}
-                  <div className="absolute top-[125px] left-[230px] w-[190px] border-t-[4px] border-dashed border-black z-0"></div>
+                  <div style={{ position: 'absolute', left: '330px', top: '120px', width: '240px', borderTop: '4px dashed black', zIndex: 0 }}></div>
                   
-                  {/* Batang Utama (Trunk) vertikal dari Kades turun ke bawah */}
-                  <div className="absolute left-[498px] top-[260px] w-1 h-[60px] bg-black z-0"></div>
-                  <div className="absolute left-[498px] top-[320px] w-1 h-[130px] bg-black z-0"></div>
-                  <div className="absolute left-[498px] top-[450px] w-1 h-[450px] bg-black z-0"></div>
+                  {/* Batang Utama (Trunk) vertikal dari Kades turun ke Kasun */}
+                  <div style={{ position: 'absolute', left: '648px', top: '260px', width: '4px', height: '680px', backgroundColor: 'black', zIndex: 0 }}></div>
 
                   {/* Cabang Sekdes (Kanan) */}
-                  <div className="absolute left-[500px] top-[320px] w-[500px] h-1 bg-black z-0"></div>
-                  <div className="absolute left-[998px] top-[320px] w-1 h-[30px] bg-black z-0"></div>
+                  <div style={{ position: 'absolute', left: '648px', top: '300px', width: '304px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '948px', top: '300px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  
                   {/* Sambungan bawah Sekdes menuju Kaur */}
-                  <div className="absolute left-[998px] top-[610px] w-1 h-[40px] bg-black z-0"></div>
+                  <div style={{ position: 'absolute', left: '948px', top: '580px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
+
+                  {/* Garis Horizontal Kaur */}
+                  <div style={{ position: 'absolute', left: '748px', top: '620px', width: '404px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  {/* Drop Kaur 1, 2, 3 */}
+                  <div style={{ position: 'absolute', left: '748px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '948px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '1148px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
 
                   {/* Cabang Kasi (Kiri) */}
-                  <div className="absolute left-[100px] top-[450px] w-[400px] h-1 bg-black z-0"></div>
-                  <div className="absolute left-[98px] top-[450px] w-1 h-[40px] bg-black z-0"></div>
-                  <div className="absolute left-[298px] top-[450px] w-1 h-[40px] bg-black z-0"></div>
-                  {/* Kasi 3 bergantung pada Batang Utama yang melintas, jadi tidak butuh garis drop tambahan */}
-
-                  {/* Cabang Kaur (Kanan Bawah Sekdes) */}
-                  <div className="absolute left-[700px] top-[650px] w-[600px] h-1 bg-black z-0"></div>
-                  <div className="absolute left-[698px] top-[650px] w-1 h-[40px] bg-black z-0"></div>
-                  <div className="absolute left-[998px] top-[650px] w-1 h-[40px] bg-black z-0"></div>
-                  <div className="absolute left-[1298px] top-[650px] w-1 h-[40px] bg-black z-0"></div>
+                  <div style={{ position: 'absolute', left: '148px', top: '420px', width: '504px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  {/* Drop Kasi 1, 2, 3 */}
+                  <div style={{ position: 'absolute', left: '148px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '348px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '548px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
 
                   {/* Cabang Kasun (Paling Bawah) */}
-                  <div className="absolute left-[250px] top-[900px] w-[500px] h-1 bg-black z-0"></div>
-                  <div className="absolute left-[248px] top-[900px] w-1 h-[40px] bg-black z-0"></div>
-                  <div className="absolute left-[498px] top-[900px] w-1 h-[40px] bg-black z-0"></div>
-                  <div className="absolute left-[748px] top-[900px] w-1 h-[40px] bg-black z-0"></div>
+                  <div style={{ position: 'absolute', left: '348px', top: '940px', width: '604px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  {/* Drop Kasun 1, 2, 3 */}
+                  <div style={{ position: 'absolute', left: '348px', top: '940px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '648px', top: '940px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  <div style={{ position: 'absolute', left: '948px', top: '940px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
+
 
                   {/* --- KARTU PERANGKAT DESA (NODES) --- */}
                   
                   {/* Kotak BPD (Statis) */}
-                  <div className="absolute left-[70px] top-[85px] w-[160px] h-[80px] bg-white border-[3px] border-black flex items-center justify-center font-black text-2xl shadow-lg z-10 tracking-widest">
+                  <div style={{ position: 'absolute', left: '170px', top: '80px', width: '160px', height: '80px', zIndex: 10 }} className="bg-white border-[3px] border-black flex items-center justify-center font-black text-2xl shadow-lg tracking-widest">
                     BPD
                   </div>
 
                   {/* Level 1: Kepala Desa */}
-                  <div className="absolute left-[420px] top-0 z-10">
+                  <div style={{ position: 'absolute', left: '570px', top: '0px', zIndex: 10 }}>
                     {kadesList[0] && <PerangkatCard p={kadesList[0]} />}
                   </div>
 
                   {/* Level 2: Sekretaris Desa */}
-                  <div className="absolute left-[920px] top-[350px] z-10">
+                  <div style={{ position: 'absolute', left: '870px', top: '320px', zIndex: 10 }}>
                     {sekdesList[0] && <PerangkatCard p={sekdesList[0]} />}
                   </div>
 
                   {/* Level 3: Kasi (Kiri) */}
-                  <div className="absolute left-[20px] top-[490px] z-10">
+                  <div style={{ position: 'absolute', left: '70px', top: '460px', zIndex: 10 }}>
                     {kasiList[0] && <PerangkatCard p={kasiList[0]} />}
                   </div>
-                  <div className="absolute left-[220px] top-[490px] z-10">
+                  <div style={{ position: 'absolute', left: '270px', top: '460px', zIndex: 10 }}>
                     {kasiList[1] && <PerangkatCard p={kasiList[1]} />}
                   </div>
-                  <div className="absolute left-[420px] top-[490px] z-10">
+                  <div style={{ position: 'absolute', left: '470px', top: '460px', zIndex: 10 }}>
                     {kasiList[2] && <PerangkatCard p={kasiList[2]} />}
                   </div>
 
                   {/* Level 3: Kaur (Kanan) */}
-                  <div className="absolute left-[620px] top-[690px] z-10">
+                  <div style={{ position: 'absolute', left: '670px', top: '640px', zIndex: 10 }}>
                     {kaurList[0] && <PerangkatCard p={kaurList[0]} />}
                   </div>
-                  <div className="absolute left-[920px] top-[690px] z-10">
+                  <div style={{ position: 'absolute', left: '870px', top: '640px', zIndex: 10 }}>
                     {kaurList[1] && <PerangkatCard p={kaurList[1]} />}
                   </div>
-                  <div className="absolute left-[1220px] top-[690px] z-10">
+                  <div style={{ position: 'absolute', left: '1070px', top: '640px', zIndex: 10 }}>
                     {kaurList[2] && <PerangkatCard p={kaurList[2]} />}
                   </div>
 
                   {/* Level 4: Kasun (Bawah Tengah) */}
-                  <div className="absolute left-[170px] top-[940px] z-10">
+                  <div style={{ position: 'absolute', left: '270px', top: '980px', zIndex: 10 }}>
                     {kasunList[0] && <PerangkatCard p={kasunList[0]} />}
                   </div>
-                  <div className="absolute left-[420px] top-[940px] z-10">
+                  <div style={{ position: 'absolute', left: '570px', top: '980px', zIndex: 10 }}>
                     {kasunList[1] && <PerangkatCard p={kasunList[1]} />}
                   </div>
-                  <div className="absolute left-[670px] top-[940px] z-10">
+                  <div style={{ position: 'absolute', left: '870px', top: '980px', zIndex: 10 }}>
                     {kasunList[2] && <PerangkatCard p={kasunList[2]} />}
                   </div>
 
