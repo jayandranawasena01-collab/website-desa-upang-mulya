@@ -22,8 +22,12 @@ let db: any = null;
 let appId = 'desa-upang-mulya';
 
 // ================= KONFIGURASI DATABASE MANUAL =================
+// CATATAN: API Key dikosongkan sementara agar menggunakan database dari environment Canvas
+// Hal ini untuk mencegah error "auth/configuration-not-found".
+// Silakan isi kembali apiKey saat deploy ke Vercel dan pastikan 
+// metode "Anonymous" (Anonim) sudah diaktifkan di menu Authentication Firebase Anda.
 const firebaseConfigManual = {
-  apiKey: "AIzaSyBIl0_tSPDJux9rr2FIL_-ZLZFqLPQ4WCY",
+  apiKey: "",
   authDomain: "web-desa-delta-upang.firebaseapp.com",
   projectId: "web-desa-delta-upang",
   storageBucket: "web-desa-delta-upang.firebasestorage.app",
@@ -287,7 +291,9 @@ export default function App() {
       } catch (error: any) {
         console.error("Auth error:", error.message);
         if (error.code === 'auth/configuration-not-found' || error.code === 'auth/operation-not-allowed') {
-          setDbError("Autentikasi Firebase gagal. Aktifkan 'Anonymous Login' di menu Authentication Firebase.");
+          setDbError("Autentikasi Firebase gagal. Pastikan API Key valid dan 'Anonymous Login' sudah diaktifkan di Firebase.");
+        } else {
+          setDbError(`Firebase Error: ${error.message}`);
         }
       }
     };
@@ -305,7 +311,7 @@ export default function App() {
 
   // ================= FETCH DATA =================
   useEffect(() => {
-    if (!db) return; 
+    if (!db || !user) return; 
 
     const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
       setIsDbConnected(true); 
@@ -360,13 +366,13 @@ export default function App() {
     return () => {
       unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil();
     };
-  }, []); 
+  }, [user]); 
 
   // ================= UPDATE FUNCTIONS =================
   const updateBeranda = async (newData: any) => {
     setDataBeranda(newData);
     if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_beranda', JSON.stringify(newData));
-    if(db) {
+    if(db && user) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_beranda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     } else {
       showAlert("Perubahan disimpan secara LOKAL. Aktifkan koneksi database untuk mensinkronisasi.");
@@ -376,7 +382,7 @@ export default function App() {
   const updateBerita = async (newData: any) => {
     setDaftarBerita(newData);
     if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_berita', JSON.stringify(newData));
-    if(db) {
+    if(db && user) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_berita', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
@@ -384,7 +390,7 @@ export default function App() {
   const updateGrafik = async (newData: any) => {
     setDataGrafik(newData);
     if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_grafik', JSON.stringify(newData));
-    if(db) {
+    if(db && user) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_grafik', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
@@ -392,7 +398,7 @@ export default function App() {
   const updateAgenda = async (newData: any) => {
     setDaftarAgenda(newData);
     if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_agenda', JSON.stringify(newData));
-    if(db) {
+    if(db && user) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_agenda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
@@ -400,21 +406,21 @@ export default function App() {
   const updatePerangkat = async (newData: any) => {
     setDaftarPerangkat(newData);
     if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_perangkat', JSON.stringify(newData));
-    if(db) {
+    if(db && user) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_perangkat', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updateLembaga = async (newData: any) => {
     setDaftarLembaga(newData);
     if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_lembaga', JSON.stringify(newData));
-    if(db) {
+    if(db && user) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_lembaga', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updateProfil = async (newData: any) => {
     setDaftarProfil(newData);
     if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_profil', JSON.stringify(newData));
-    if(db) {
+    if(db && user) {
       try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_profil', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
