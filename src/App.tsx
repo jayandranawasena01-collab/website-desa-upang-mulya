@@ -22,12 +22,8 @@ let db: any = null;
 let appId = 'desa-upang-mulya';
 
 // ================= KONFIGURASI DATABASE MANUAL =================
-// CATATAN: API Key dikosongkan sementara agar menggunakan database dari environment Canvas
-// Hal ini untuk mencegah error "auth/configuration-not-found".
-// Silakan isi kembali apiKey saat deploy ke Vercel dan pastikan 
-// metode "Anonymous" (Anonim) sudah diaktifkan di menu Authentication Firebase Anda.
 const firebaseConfigManual = {
-  apiKey: "",
+  apiKey: "AIzaSyBIl0_tSPDJux9rr2FIL_-ZLZFqLPQ4WCY",
   authDomain: "web-desa-delta-upang.firebaseapp.com",
   projectId: "web-desa-delta-upang",
   storageBucket: "web-desa-delta-upang.firebasestorage.app",
@@ -36,22 +32,17 @@ const firebaseConfigManual = {
   measurementId: "G-JLGMKQXVV4"
 };
 
-// Cek apakah config manual sudah diisi dengan benar
-let isManualConfigValid = false;
-if (firebaseConfigManual.apiKey && firebaseConfigManual.apiKey.length > 20) {
-  isManualConfigValid = true;
-}
-
 // Mencegah Firebase berjalan saat proses "Build" di server Vercel (SSR)
 if (typeof window !== 'undefined') {
   try {
     appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-upang-mulya';
     
-    const firebaseConfig = isManualConfigValid 
-      ? firebaseConfigManual 
-      : (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
+    // Prioritaskan config dari environment (Canvas) jika ada, jika tidak gunakan config manual
+    const firebaseConfig = (typeof __firebase_config !== 'undefined' && __firebase_config) 
+      ? JSON.parse(__firebase_config) 
+      : firebaseConfigManual;
     
-    if (firebaseConfig && Object.keys(firebaseConfig).length > 0) {
+    if (firebaseConfig && firebaseConfig.apiKey) {
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
       db = initializeFirestore(app, { experimentalForceLongPolling: true });
@@ -283,15 +274,15 @@ export default function App() {
 
     const initAuth = async () => {
       try {
-        if (!isManualConfigValid && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
         } else {
           await signInAnonymously(auth);
         }
       } catch (error: any) {
         console.error("Auth error:", error.message);
-        if (error.code === 'auth/configuration-not-found' || error.code === 'auth/operation-not-allowed') {
-          setDbError("Autentikasi Firebase gagal. Pastikan API Key valid dan 'Anonymous Login' sudah diaktifkan di Firebase.");
+        if (error.code === 'auth/operation-not-allowed') {
+          setDbError("Autentikasi Firebase gagal. Pastikan metode 'Anonymous Login' sudah Anda aktifkan di menu Authentication Firebase Console.");
         } else {
           setDbError(`Firebase Error: ${error.message}`);
         }
@@ -311,6 +302,8 @@ export default function App() {
 
   // ================= FETCH DATA =================
   useEffect(() => {
+    // PENTING: Tunggu hingga Firebase database DAN user auth token (anonymous/custom) tersedia.
+    // Jika tidak, permintaan baca data ini akan diblokir oleh aturan izin (permission denied).
     if (!db || !user) return; 
 
     const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
@@ -366,7 +359,7 @@ export default function App() {
     return () => {
       unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil();
     };
-  }, [user]); 
+  }, [user]); // Dependensi user ditambahkan agar fungsi berjalan HANYA jika terautentikasi
 
   // ================= UPDATE FUNCTIONS =================
   const updateBeranda = async (newData: any) => {
