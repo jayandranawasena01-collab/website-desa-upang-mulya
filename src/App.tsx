@@ -19,14 +19,12 @@ declare const __initial_auth_token: any;
 let app: any = null;
 let auth: any = null;
 let db: any = null;
-let appId = 'desa-delta-upang';
+let appId = 'desa-upang-mulya';
 
 // ================= KONFIGURASI DATABASE MANUAL =================
-// Agar perubahan dari Admin bisa dilihat pengunjung secara real-time di HP mereka, 
-// Anda perlu membuat database Firebase gratis dan memasukkan kodenya di bawah ini:
 const firebaseConfigManual = {
   apiKey: "AIzaSyBIl0_tSPDJux9rr2FIL_-ZLZFqLPQ4WCY",
-  authDomain: "web-desa-delta-upang.firebaseapp.com",
+  authDomain: "web-desa-delta-upang.firebaseapp.com", // Biarkan domain bawaan firebase
   projectId: "web-desa-delta-upang",
   storageBucket: "web-desa-delta-upang.firebasestorage.app",
   messagingSenderId: "673276122437",
@@ -43,9 +41,8 @@ if (firebaseConfigManual.apiKey && firebaseConfigManual.apiKey.length > 20) {
 // Mencegah Firebase berjalan saat proses "Build" di server Vercel (SSR)
 if (typeof window !== 'undefined') {
   try {
-    appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-delta-upang';
+    appId = typeof __app_id !== 'undefined' ? __app_id : 'desa-upang-mulya';
     
-    // PERBAIKAN: Memprioritaskan Config Manual agar Komputer & HP membaca Database yang SAMA
     const firebaseConfig = isManualConfigValid 
       ? firebaseConfigManual 
       : (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null);
@@ -93,15 +90,15 @@ const compressImage = (file: any, maxWidth: any, isLogo: any, callback: any) => 
   };
 };
 
-// ================= DATA AWAL DEFAULT =================
+// ================= DATA AWAL DEFAULT (UPANG MULYA) =================
 const initialBerita = [
   {
     id: 1,
-    judul: "Penyaluran Bantuan Langsung Tunai (BLT) Dana Desa Tahap III",
+    judul: "Penyaluran Bantuan Langsung Tunai (BLT) Dana Desa Upang Mulya Tahap III",
     tanggal: "12 Okt 2024",
     kategori: "Sosial",
     gambar: "https://images.unsplash.com/photo-1593113565694-c6f130d24c3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    excerpt: "Pemerintah Desa Delta Upang kembali menyalurkan Bantuan Langsung Tunai (BLT) yang bersumber dari Dana Desa (DD) kepada keluarga penerima manfaat...\n\n(Teks selengkapnya) Bantuan ini diharapkan dapat meringankan beban ekonomi warga, terutama dalam memenuhi kebutuhan pokok sehari-hari. Kepala Desa menghimbau agar dana tersebut digunakan sebaik-baiknya untuk kebutuhan primer."
+    excerpt: "Pemerintah Desa Upang Mulya kembali menyalurkan Bantuan Langsung Tunai (BLT) yang bersumber dari Dana Desa (DD) kepada keluarga penerima manfaat...\n\n(Teks selengkapnya) Bantuan ini diharapkan dapat meringankan beban ekonomi warga, terutama dalam memenuhi kebutuhan pokok sehari-hari. Kepala Desa menghimbau agar dana tersebut digunakan sebaik-baiknya untuk kebutuhan primer."
   },
   {
     id: 2,
@@ -109,7 +106,7 @@ const initialBerita = [
     tanggal: "05 Okt 2024",
     kategori: "Kegiatan",
     gambar: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    excerpt: "Mengantisipasi datangnya musim penghujan, warga Desa Delta Upang bergotong royong membersihkan saluran air dan fasilitas umum guna mencegah banjir...\n\n(Teks selengkapnya) Kegiatan ini diikuti oleh seluruh elemen masyarakat dari 4 Dusun. Selain membersihkan selokan, warga juga melakukan pemangkasan dahan pohon yang rawan tumbang serta membersihkan area pekarangan fasilitas umum."
+    excerpt: "Mengantisipasi datangnya musim penghujan, warga Desa Upang Mulya bergotong royong membersihkan saluran air dan fasilitas umum guna mencegah banjir...\n\n(Teks selengkapnya) Kegiatan ini diikuti oleh seluruh elemen masyarakat. Selain membersihkan selokan, warga juga melakukan pemangkasan dahan pohon yang rawan tumbang serta membersihkan area pekarangan fasilitas umum."
   },
   {
     id: 3,
@@ -117,17 +114,17 @@ const initialBerita = [
     tanggal: "28 Sep 2024",
     kategori: "Pemberdayaan",
     gambar: "https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    excerpt: "BUMDes bekerja sama dengan penyuluh pertanian kecamatan mengadakan pelatihan pembuatan pupuk kompos organik yang diikuti oleh 30 petani lokal...\n\n(Teks selengkapnya) Pelatihan ini bertujuan untuk meningkatkan kemandirian petani dalam penyediaan pupuk, menekan biaya produksi pertanian, sekaligus mengedukasi warga tentang pengelolaan limbah organik menjadi barang bernilai ekonomis tinggi."
+    excerpt: "BUMDes bekerja sama dengan penyuluh pertanian kecamatan mengadakan pelatihan pembuatan pupuk kompos organik yang diikuti oleh petani lokal Upang Mulya...\n\n(Teks selengkapnya) Pelatihan ini bertujuan untuk meningkatkan kemandirian petani dalam penyediaan pupuk, menekan biaya produksi pertanian, sekaligus mengedukasi warga tentang pengelolaan limbah organik."
   }
 ];
 
 const initialPerangkat = [
-  { id: 1, nama: "Zaenal Efendi, S.IP", jabatan: "Kepala Desa", foto: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz" },
-  { id: 2, nama: "Gunarjo, S.Pd.", jabatan: "Sekretaris Desa", foto: "https://lh3.googleusercontent.com/d/1X-AHk2zbETCD85uTxPT0PCaa3LMVyttE" },
+  { id: 1, nama: "Hasanuddin, S.IP", jabatan: "Kepala Desa", foto: "https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 2, nama: "Ahmad Yani, S.Pd.", jabatan: "Sekretaris Desa", foto: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 3, nama: "Siti Rahmawati", jabatan: "Kaur Keuangan", foto: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 4, nama: "Budi Santoso", jabatan: "Kaur Perencanaan", foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
   { id: 5, nama: "Dewi Lestari", jabatan: "Kasi Pemerintahan", foto: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-  { id: 6, nama: "Herman Pelani", jabatan: "Kasi Kesejahteraan", foto: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 6, nama: "Herman Pelani", jabatan: "Kasi Kesejahteraan", foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
 ];
 
 const initialLembaga = [
@@ -143,28 +140,28 @@ const initialProfil = [
     iconName: "BookOpen",
     judul: "Sejarah",
     gambar: "https://images.unsplash.com/photo-1572005996025-06900f6b6474?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    konten: "Desa Delta Upang memiliki sejarah panjang yang mengakar pada nilai-nilai perjuangan dan semangat gotong royong masyarakat pesisir. Sejak awal berdirinya, desa ini terus berkembang menjadi pusat harmoni sosial tempat bertemunya keberagaman budaya yang menyatu dalam kehangatan.\n\nPerjalanan panjang desa ini tidak lepas dari peran serta tetua adat dan tokoh masyarakat yang bahu-membahu membangun peradaban dari tanah yang dulunya terpencil menjadi kawasan yang kian maju dan terbuka terhadap inovasi."
+    konten: "Desa Upang Mulya memiliki sejarah panjang yang mengakar pada nilai-nilai perjuangan dan semangat gotong royong masyarakat. Sejak awal berdirinya, desa ini terus berkembang menjadi pusat harmoni sosial tempat bertemunya keberagaman budaya yang menyatu dalam kehangatan.\n\nPerjalanan panjang desa ini tidak lepas dari peran serta tetua adat dan tokoh masyarakat yang bahu-membahu membangun peradaban dari tanah yang dulunya terpencil menjadi kawasan yang kian maju dan terbuka terhadap inovasi."
   },
   {
     id: 2,
     iconName: "Target",
     judul: "Visi & Misi",
     gambar: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    konten: "VISI KAMI:\n\"Terwujudnya Desa Delta Upang yang Mandiri, Sejahtera, Religius, dan Berbudaya melalui Tata Kelola Pemerintahan yang Baik dan Inovatif.\"\n\nMISI DESA:\n1. Meningkatkan kualitas pelayanan publik administrasi kependudukan yang cepat, tepat, dan transparan.\n2. Meningkatkan pembangunan infrastruktur jalan, jembatan, dan fasilitas umum desa yang berkualitas dan merata.\n3. Memberdayakan ekonomi kerakyatan dan pertanian melalui optimalisasi BUMDes dan Kelompok Tani.\n4. Meningkatkan kualitas sumber daya manusia melalui dukungan pada sektor pendidikan dan kesehatan dasar.\n5. Melestarikan nilai-nilai gotong royong, budaya lokal, dan kerukunan antar umat beragama."
+    konten: "VISI KAMI:\n\"Terwujudnya Desa Upang Mulya yang Mandiri, Sejahtera, Religius, dan Berbudaya melalui Tata Kelola Pemerintahan yang Baik dan Inovatif.\"\n\nMISI DESA:\n1. Meningkatkan kualitas pelayanan publik administrasi kependudukan yang cepat, tepat, dan transparan.\n2. Meningkatkan pembangunan infrastruktur jalan, jembatan, dan fasilitas umum desa yang berkualitas dan merata.\n3. Memberdayakan ekonomi kerakyatan dan pertanian melalui optimalisasi BUMDes dan Kelompok Tani.\n4. Meningkatkan kualitas sumber daya manusia melalui dukungan pada sektor pendidikan dan kesehatan dasar.\n5. Melestarikan nilai-nilai gotong royong, budaya lokal, dan kerukunan antar umat beragama."
   },
   {
     id: 3,
     iconName: "Map",
-    judul: "Kondisi geografis",
+    judul: "Kondisi Geografis",
     gambar: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    konten: "Terletak di bentang alam yang subur dan dialiri oleh perairan sungai yang strategis di Kecamatan Makarti Jaya, Desa Delta Upang menyimpan potensi agraris dan perikanan yang sangat melimpah.\n\nKondisi topografi dataran rendah dengan curah hujan yang seimbang menjadikan tanah di desa kami sangat cocok untuk pengembangan sektor pertanian unggulan. Suasana pedesaan yang asri, udara yang segar, serta hamparan alam yang masih terjaga menjadikan Delta Upang tidak hanya makmur secara ekonomi namun juga nyaman untuk ditinggali."
+    konten: "Terletak di bentang alam yang subur dan dialiri oleh perairan sungai yang strategis, Desa Upang Mulya menyimpan potensi agraris dan perikanan yang sangat melimpah.\n\nKondisi topografi dataran rendah dengan curah hujan yang seimbang menjadikan tanah di desa kami sangat cocok untuk pengembangan sektor pertanian unggulan. Suasana pedesaan yang asri, udara yang segar, serta hamparan alam yang masih terjaga menjadikan Upang Mulya tidak hanya makmur secara ekonomi namun juga nyaman untuk ditinggali."
   },
   {
     id: 4,
     iconName: "Building2",
-    judul: "Struktur organisasi",
+    judul: "Struktur Organisasi",
     gambar: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    konten: "Pemerintahan Desa Delta Upang didukung oleh struktur organisasi yang tangguh, responsif, dan adaptif terhadap kemajuan zaman. Diisi oleh putra-putri terbaik desa yang berdedikasi tinggi, kami melayani masyarakat dengan sepenuh hati.\n\nSetiap fungsi pemerintahan, mulai dari Kepala Desa, Sekretaris, jajaran Kepala Urusan (Kaur), Kepala Seksi (Kasi), hingga Kepala Dusun, berjalan secara sinergis dengan menjunjung tinggi prinsip transparansi dan profesionalisme demi kemajuan bersama seluruh elemen masyarakat Delta Upang."
+    konten: "Pemerintahan Desa Upang Mulya didukung oleh struktur organisasi yang tangguh, responsif, dan adaptif terhadap kemajuan zaman. Diisi oleh putra-putri terbaik desa yang berdedikasi tinggi, kami melayani masyarakat dengan sepenuh hati.\n\nSetiap fungsi pemerintahan, mulai dari Kepala Desa, Sekretaris, jajaran Kepala Urusan (Kaur), Kepala Seksi (Kasi), hingga Kepala Dusun, berjalan secara sinergis dengan menjunjung tinggi prinsip transparansi dan profesionalisme demi kemajuan bersama seluruh elemen masyarakat Upang Mulya."
   }
 ];
 
@@ -172,12 +169,12 @@ const initialBeranda = {
   heroBg: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
   logoHero: "", 
   headerLogo: "", 
-  namaDesa: "Delta Upang",
+  namaDesa: "Upang Mulya",
   deskripsiDesa: "Kecamatan Makarti Jaya, Kabupaten Banyuasin \nProvinsi Sumatera Selatan",
-  fotoKades: "https://lh3.googleusercontent.com/d/1L5Y15w_obbihHFz4rUMrOAci5V7TtAIz",
-  namaKades: "Zaenal Efendi, S.IP",
-  jabatanKades: "Kepala Desa Delta Upang",
-  sambutanKades: "Assalamu'alaikum Warahmatullahi Wabarakatuh. Puji syukur kita panjatkan ke hadirat Allah SWT. Selamat datang di website resmi Desa Delta Upang. Melalui media ini, kami berupaya mewujudkan transparansi dan kemudahan akses informasi bagi seluruh warga dan masyarakat luas mengenai program kerja, kegiatan, dan pembangunan di desa kita tercinta.",
+  fotoKades: "https://images.unsplash.com/photo-1552058544-f2b08422138a?w=400&q=80",
+  namaKades: "Hasanuddin, S.IP",
+  jabatanKades: "Kepala Desa Upang Mulya",
+  sambutanKades: "Assalamu'alaikum Warahmatullahi Wabarakatuh. Puji syukur kita panjatkan ke hadirat Allah SWT. Selamat datang di website resmi Desa Upang Mulya. Melalui media ini, kami berupaya mewujudkan transparansi dan kemudahan akses informasi bagi seluruh warga dan masyarakat luas mengenai program kerja, kegiatan, dan pembangunan di desa kita tercinta.",
   stats: [
     { id: 1, num: "3.689", label: "Total Penduduk", subLaki: "1.874", subPerempuan: "1.815" },
     { id: 2, num: "823", label: "Kepala Keluarga" },
@@ -189,7 +186,7 @@ const initialBeranda = {
 export default function App() {
   const [user, setUser] = useState<any>(null);
   const [isDbConnected, setIsDbConnected] = useState(false); 
-  const [dbError, setDbError] = useState(""); // Menyimpan pesan error Firebase
+  const [dbError, setDbError] = useState(""); 
   const [currentPage, setCurrentPage] = useState('beranda');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -206,7 +203,7 @@ export default function App() {
   // State Admin
   const [isAdmin, setIsAdmin] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('desa_admin_status') === 'true';
+      return localStorage.getItem('upang_mulya_admin') === 'true';
     }
     return false;
   });
@@ -217,7 +214,7 @@ export default function App() {
   const showAlert = (message: string) => setDialog({ isOpen: true, type: 'alert', message, onConfirm: null });
   const showConfirm = (message: string, onConfirm: any) => setDialog({ isOpen: true, type: 'confirm', message, onConfirm });
   
-  // ================= INIT STATE (Dengan LocalStorage Fallback) =================
+  // ================= INIT STATE =================
   const getInitialData = (key: string, fallback: any) => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(key);
@@ -226,16 +223,16 @@ export default function App() {
     return fallback;
   };
 
-  const [daftarBerita, setDaftarBerita] = useState(() => getInitialData('desa_berita_v2', initialBerita));
-  const [daftarPerangkat, setDaftarPerangkat] = useState(() => getInitialData('desa_perangkat_v2', initialPerangkat));
-  const [daftarLembaga, setDaftarLembaga] = useState(() => getInitialData('desa_lembaga_v2', initialLembaga));
-  const [daftarProfil, setDaftarProfil] = useState(() => getInitialData('desa_profil_v2', initialProfil));
-  const [dataBeranda, setDataBeranda] = useState(() => getInitialData('desa_beranda_v2', initialBeranda));
+  const [daftarBerita, setDaftarBerita] = useState(() => getInitialData('upang_mulya_berita', initialBerita));
+  const [daftarPerangkat, setDaftarPerangkat] = useState(() => getInitialData('upang_mulya_perangkat', initialPerangkat));
+  const [daftarLembaga, setDaftarLembaga] = useState(() => getInitialData('upang_mulya_lembaga', initialLembaga));
+  const [daftarProfil, setDaftarProfil] = useState(() => getInitialData('upang_mulya_profil', initialProfil));
+  const [dataBeranda, setDataBeranda] = useState(() => getInitialData('upang_mulya_beranda', initialBeranda));
 
-  // ================= MONITORING KONEKSI INTERNET FISIK =================
+  // ================= MONITORING KONEKSI =================
   useEffect(() => {
     const handleOnline = () => {};
-    const handleOffline = () => setIsDbConnected(false); // Langsung set Offline jika internet putus
+    const handleOffline = () => setIsDbConnected(false); 
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -250,14 +247,13 @@ export default function App() {
     };
   }, []);
 
-  // ================= INIT FIREBASE AUTH (STABILITAS KONEKSI URUTAN) =================
+  // ================= INIT FIREBASE AUTH =================
   useEffect(() => {
     if (!auth) return;
     let isMounted = true;
 
     const initAuth = async () => {
       try {
-        // PERBAIKAN: Jangan gunakan token lokal jika sedang mengakses DB Manual, hindari error tabrakan.
         if (!isManualConfigValid && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
           await signInWithCustomToken(auth, __initial_auth_token);
         } else {
@@ -265,15 +261,12 @@ export default function App() {
         }
       } catch (error: any) {
         console.error("Auth error:", error.message);
-        // Proses tetap lanjut meskipun gagal login, agar mencoba ambil data publik.
       }
     };
     initAuth();
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (isMounted) {
-        setUser(currentUser);
-      }
+      if (isMounted) setUser(currentUser);
     });
 
     return () => {
@@ -282,31 +275,24 @@ export default function App() {
     };
   }, []);
 
-  // ================= FETCH DATA (SINKRONISASI SERVER PRIORITAS UTAMA) =================
+  // ================= FETCH DATA =================
   useEffect(() => {
-    // PERBAIKAN: Tidak perlu menunggu `user`, database akan langsung mencoba mengambil data 
-    // jika settingan 'Rules' Firestore Anda sudah diatur menjadi publik.
     if (!db) return; 
 
-    // Fungsi bantu untuk menerima data server, memprioritaskannya, dan sinkronisasi lokal
     const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
-      setIsDbConnected(true); // Indikator koneksi berhasil Akurat
+      setIsDbConnected(true); 
       setDbError(""); 
       if (snap.exists()) {
         const val = snap.data().value;
         const parsedData = typeof val === 'string' ? JSON.parse(val) : val;
         
-        // 1. Update ke State UI (Data Server Diutamakan)
         stateSetter(parsedData);
-        
-        // 2. Sinkronisasi (Timpa memori HP dengan data server terbaru)
         if (typeof window !== 'undefined') {
           localStorage.setItem(storageKey, JSON.stringify(parsedData));
         }
       }
     };
 
-    // Fungsi penanganan jika database menolak karena aturan 'Rules' belum diubah
     const handleServerError = (err: any) => {
       console.error("Gagal sinkronisasi data:", err);
       setIsDbConnected(false);
@@ -315,42 +301,37 @@ export default function App() {
       }
     };
 
-    const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_beranda', 'main'), 
-      (snap) => handleServerData(snap, setDataBeranda, 'desa_beranda_v2'),
-      handleServerError
+    const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_beranda', 'main'), 
+      (snap) => handleServerData(snap, setDataBeranda, 'upang_mulya_beranda'), handleServerError
     );
 
-    const unsubBerita = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_berita', 'main'), 
-      (snap) => handleServerData(snap, setDaftarBerita, 'desa_berita_v2'),
-      handleServerError
+    const unsubBerita = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_berita', 'main'), 
+      (snap) => handleServerData(snap, setDaftarBerita, 'upang_mulya_berita'), handleServerError
     );
 
-    const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat', 'main'), 
-      (snap) => handleServerData(snap, setDaftarPerangkat, 'desa_perangkat_v2'),
-      handleServerError
+    const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_perangkat', 'main'), 
+      (snap) => handleServerData(snap, setDaftarPerangkat, 'upang_mulya_perangkat'), handleServerError
     );
 
-    const unsubLembaga = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga', 'main'), 
-      (snap) => handleServerData(snap, setDaftarLembaga, 'desa_lembaga_v2'),
-      handleServerError
+    const unsubLembaga = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_lembaga', 'main'), 
+      (snap) => handleServerData(snap, setDaftarLembaga, 'upang_mulya_lembaga'), handleServerError
     );
 
-    const unsubProfil = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'desa_profil', 'main'), 
-      (snap) => handleServerData(snap, setDaftarProfil, 'desa_profil_v2'),
-      handleServerError
+    const unsubProfil = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_profil', 'main'), 
+      (snap) => handleServerData(snap, setDaftarProfil, 'upang_mulya_profil'), handleServerError
     );
 
     return () => {
       unsubBeranda(); unsubBerita(); unsubPerangkat(); unsubLembaga(); unsubProfil();
     };
-  }, []); // Array dependensi kosong, hanya jalan sekali saat aplikasi dimuat
+  }, []); 
 
   // ================= UPDATE FUNCTIONS =================
   const updateBeranda = async (newData: any) => {
     setDataBeranda(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('desa_beranda_v2', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_beranda', JSON.stringify(newData));
     if(db) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_beranda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_beranda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     } else {
       showAlert("Perubahan disimpan secara LOKAL. Aktifkan koneksi database untuk mensinkronisasi.");
     }
@@ -358,30 +339,30 @@ export default function App() {
   
   const updateBerita = async (newData: any) => {
     setDaftarBerita(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('desa_berita_v2', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_berita', JSON.stringify(newData));
     if(db) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_berita', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_berita', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updatePerangkat = async (newData: any) => {
     setDaftarPerangkat(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('desa_perangkat_v2', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_perangkat', JSON.stringify(newData));
     if(db) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_perangkat', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_perangkat', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updateLembaga = async (newData: any) => {
     setDaftarLembaga(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('desa_lembaga_v2', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_lembaga', JSON.stringify(newData));
     if(db) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_lembaga', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_lembaga', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   const updateProfil = async (newData: any) => {
     setDaftarProfil(newData);
-    if (typeof window !== 'undefined') localStorage.setItem('desa_profil_v2', JSON.stringify(newData));
+    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_profil', JSON.stringify(newData));
     if(db) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'desa_profil', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_profil', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
 
@@ -402,7 +383,7 @@ export default function App() {
 
   useEffect(() => { 
     if (typeof window !== 'undefined') {
-      try { localStorage.setItem('desa_admin_status', isAdmin.toString()); } catch(e){} 
+      try { localStorage.setItem('upang_mulya_admin', isAdmin.toString()); } catch(e){} 
     }
   }, [isAdmin]);
 
@@ -423,7 +404,7 @@ export default function App() {
     const username = e.target.username.value;
     const password = e.target.password.value;
     
-    if (username === 'Andiwidodo' && password === 'admin2311') {
+    if (username === 'Admin' && password === 'admin2311') {
       setIsAdmin(true);
       setShowLoginModal(false);
     } else {
@@ -512,7 +493,7 @@ export default function App() {
                 )}
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-2xl font-extrabold tracking-tight leading-none drop-shadow-md">Desa Delta Upang</h1>
+                <h1 className="text-2xl font-extrabold tracking-tight leading-none drop-shadow-md">Desa Upang Mulya</h1>
                 <p className="text-xs text-emerald-200 font-medium mt-1 tracking-wide">Kec. Makarti Jaya, Kab. Banyuasin</p>
               </div>
             </div>
@@ -548,7 +529,7 @@ export default function App() {
                   isDesktopProfilOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'
                 }`}>
                   <div className="flex flex-col py-1.5">
-                    {daftarProfil.map((profil) => (
+                    {daftarProfil.map((profil: any) => (
                       <button
                         key={profil.id}
                         onClick={(e: any) => {
@@ -687,7 +668,7 @@ export default function App() {
                 </button>
                 {isMobileProfilOpen && (
                   <div className="flex flex-col bg-emerald-900/50 rounded-xl mt-2 mx-2 overflow-hidden border border-white/5 animate-in slide-in-from-top-2 duration-200">
-                    {daftarProfil.map((profil) => (
+                    {daftarProfil.map((profil: any) => (
                       <button
                         key={profil.id}
                         onClick={() => navigateTo('profil', profil.id)}
@@ -754,7 +735,6 @@ export default function App() {
              <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
            </div>
            
-           {/* Indikator Status Akurat yang baru diperbarui */}
            {!isDbConnected && !dbError && (
              <div className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
                ⏳ Menghubungkan ke Server / Mode Offline Sementara...
@@ -766,7 +746,6 @@ export default function App() {
              </div>
            )}
 
-           {/* Menampilkan pesan Error jika Permission Denied pada Firebase (Rules belum public) */}
            {dbError && (
              <div className="bg-rose-200 text-rose-800 border border-rose-400 px-4 py-2 rounded-xl text-xs font-bold w-full max-w-2xl mt-1 text-left sm:text-center">
                ⚠️ {dbError} <br/>
@@ -828,10 +807,10 @@ export default function App() {
                 <div className="bg-emerald-800 p-2.5 rounded-lg shadow-lg shadow-emerald-900/50">
                   <Landmark className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold tracking-tight text-white">Desa Delta Upang</h3>
+                <h3 className="text-2xl font-bold tracking-tight text-white">Desa Upang Mulya</h3>
               </div>
               <p className="text-gray-400 leading-relaxed mb-6 font-medium">
-                Website resmi Pemerintah Desa Delta Upang, Kecamatan Makarti Jaya, Kabupaten Banyuasin, Sumatera Selatan. Melayani masyarakat dengan transparansi dan inovasi.
+                Website resmi Pemerintah Desa Upang Mulya, Kecamatan Makarti Jaya, Kabupaten Banyuasin, Sumatera Selatan. Melayani masyarakat dengan transparansi dan inovasi.
               </p>
             </div>
             <div className="md:pl-8">
@@ -866,18 +845,18 @@ export default function App() {
                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-emerald-900/50 transition mr-4">
                     <Mail className="w-5 h-5 text-emerald-400" />
                   </div>
-                  <span>deltaupang12@gmail.com</span>
+                  <span>upangmulya@gmail.com</span>
                 </li>
               </ul>
             </div>
           </div>
           <div className="border-t border-white/10 pt-8 text-center text-gray-500 text-sm font-medium">
-            <p>&copy; {new Date().getFullYear()} Pemerintah Desa Delta Upang. Seluruh hak cipta dilindungi.</p>
+            <p>&copy; {new Date().getFullYear()} Pemerintah Desa Upang Mulya. Seluruh hak cipta dilindungi.</p>
           </div>
         </div>
       </footer>
 
-      {/* Floating WhatsApp Button Khusus di Halaman Kontak */}
+      {/* Floating WhatsApp Button */}
       {currentPage === 'kontak' && (
         <a
           href="https://wa.me/6282268764585"
@@ -888,7 +867,6 @@ export default function App() {
           <svg viewBox="0 0 24 24" className="w-7 h-7 md:w-8 md:h-8 fill-current">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.88-.653-1.473-1.46-1.646-1.757-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
           </svg>
-          {/* Tooltip WhatsApp */}
           <span className="absolute right-full mr-4 bg-white text-gray-800 text-sm font-bold px-4 py-2 rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap hidden sm:block border border-gray-100">
             Hubungi via WhatsApp
           </span>
@@ -913,7 +891,7 @@ export default function App() {
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Username</label>
-                <label className="block text-sm font text-gray-500 mb-2">Hubungi admin untuk mendapatkan username dan password</label>
+                <label className="block text-sm text-gray-500 mb-2">Hubungi admin untuk mendapatkan username dan password</label>
                 <input 
                   type="text" 
                   name="username" 
@@ -1039,7 +1017,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white pb-10">
           
-          {/* Logo Custom di Hero Atas dengan Animasi Naik Turun (Float) */}
           {dataBeranda.logoHero && (
             <img 
               src={dataBeranda.logoHero} 
@@ -1048,7 +1025,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
             />
           )}
 
-          {/* Teks Berjalan (Marquee) di bawah Logo */}
           <div className="w-full max-w-4xl mx-auto overflow-hidden relative mb-6 mt-4 py-2">
             <div className="animate-roll whitespace-nowrap">
               <span 
@@ -1179,7 +1155,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   
-                  {/* Edit Background Hero */}
                   <div className="col-span-full mb-2">
                     <label className="block text-sm font-bold text-gray-700 mb-3">Gambar Latar Belakang (Hero)</label>
                     <div className="flex items-center gap-5">
@@ -1200,7 +1175,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
                     </div>
                   </div>
 
-                  {/* Edit Logo Header */}
                   <div className="col-span-full mb-2">
                     <label className="block text-sm font-bold text-gray-700 mb-3">Logo Navigasi Header (Pojok Kiri Atas)</label>
                     <div className="flex items-center gap-5">
@@ -1221,7 +1195,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, show
                     </div>
                   </div>
 
-                  {/* Edit Logo Tengah */}
                   <div className="col-span-full">
                     <label className="block text-sm font-bold text-gray-700 mb-3">Logo Teks Hero (Bagian Tengah)</label>
                     <div className="flex items-center gap-5">
@@ -1468,7 +1441,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Profil Desa</h2>
           <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
           <p className="mt-6 text-gray-600 text-lg leading-relaxed">
-            Mengenal lebih dekat sejarah, visi misi, letak geografis, dan struktur organisasi Pemerintah Desa Delta Upang.
+            Mengenal lebih dekat sejarah, visi misi, letak geografis, dan struktur organisasi Pemerintah Desa Upang Mulya.
           </p>
         </div>
 
@@ -1684,7 +1657,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
   );
 }
 
-// ============== HALAMAN PEMERINTAHAN ==============
+// ============== HALAMAN PEMERINTAHAN (DENGAN STRUKTUR BAGAN) ==============
 function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPerangkat, daftarLembaga, setDaftarLembaga, showConfirm }: any) {
   const isPerangkat = activeTab === 'perangkat' || !activeTab;
   
@@ -1700,7 +1673,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
       case 'pkk': return 'Pemberdayaan Kesejahteraan Keluarga (PKK)';
       case 'kadus': return 'Daftar Kepala Dusun';
       case 'rt': return 'Daftar Ketua RT';
-      default: return 'Struktur Organisasi';
+      default: return 'Struktur Organisasi (SOTK)';
     }
   };
 
@@ -1710,7 +1683,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
       case 'pkk': return 'Tim Penggerak PKK yang berfokus pada pemberdayaan dan kesejahteraan keluarga.';
       case 'kadus': return 'Daftar perangkat kewilayahan yang bertugas membantu Kepala Desa di wilayah Dusun.';
       case 'rt': return 'Daftar Ketua Rukun Tetangga (RT) yang menjadi ujung tombak pelayanan masyarakat.';
-      default: return 'Struktur Organisasi dan Tata Kerja (SOTK) Pemerintah Desa Delta Upang.';
+      default: return 'Struktur Organisasi dan Tata Kerja (SOTK) Pemerintah Desa Upang Mulya.';
     }
   };
 
@@ -1774,6 +1747,51 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
     }
   };
 
+  // ----- PEMISAHAN KATEGORI UNTUK BAGAN STRUKTUR -----
+  const kadesList = daftarPerangkat.filter((p: any) => p.jabatan.toLowerCase().includes('kepala desa') || p.jabatan.toLowerCase() === 'kades');
+  const sekdesList = daftarPerangkat.filter((p: any) => p.jabatan.toLowerCase().includes('sekretaris') || p.jabatan.toLowerCase() === 'sekdes');
+  const othersList = daftarPerangkat.filter((p: any) => 
+    !p.jabatan.toLowerCase().includes('kepala desa') && 
+    p.jabatan.toLowerCase() !== 'kades' &&
+    !p.jabatan.toLowerCase().includes('sekretaris') &&
+    p.jabatan.toLowerCase() !== 'sekdes'
+  );
+
+  // Helper untuk merender Card
+  const PerangkatCard = ({ p, isUtama }: any) => (
+    <div className={`bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-gray-100 group relative ${isUtama ? 'w-full max-w-[320px] mx-auto ring-4 ring-emerald-500/20' : 'w-full'}`}>
+      {isAdmin && (
+        <div className="absolute top-4 right-4 z-20 flex gap-2">
+          <button onClick={() => openEditorPerangkat(p)} className="bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-xl shadow-lg transition">
+            <Edit className="w-4 h-4" />
+          </button>
+          <button onClick={() => handleDeletePerangkat(p.id)} className="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl shadow-lg transition">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+      <div className={`relative ${isUtama ? 'h-[360px]' : 'h-80'} overflow-hidden`}>
+        <img 
+          src={p.foto} 
+          alt={p.nama} 
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={(e: any) => {
+            if (e.target.src !== 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80') {
+              e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80';
+            }
+          }} 
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+      <div className={`p-8 text-center relative bg-white -mt-4 rounded-t-3xl z-10 ${isUtama ? 'pb-10' : ''}`}>
+        <h3 className={`${isUtama ? 'text-3xl' : 'text-2xl'} font-extrabold text-gray-900 mb-2`}>{p.nama}</h3>
+        <span className={`inline-block border text-sm px-4 py-1.5 rounded-full font-bold ${isUtama ? 'bg-emerald-600 border-emerald-700 text-white shadow-md' : 'bg-emerald-50 border-emerald-200 text-emerald-800'}`}>
+          {p.jabatan}
+        </span>
+      </div>
+    </div>
+  );
+
   return (
     <div className="animate-in fade-in zoom-in-95 duration-500 py-16 bg-gray-50 min-h-[70vh]">
       <div className="container mx-auto px-4 lg:px-8 relative">
@@ -1791,9 +1809,9 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
           </p>
         </div>
 
-        {/* =========== TAMPILAN PERANGKAT DESA (CARD) =========== */}
+        {/* =========== TAMPILAN PERANGKAT DESA (HIERARKI BAGAN) =========== */}
         {isPerangkat && (
-          <div className="animate-in fade-in duration-500">
+          <div className="animate-in fade-in duration-500 max-w-6xl mx-auto">
             {isAdmin && (
               <div className="mb-10 flex justify-end bg-emerald-50 p-4 rounded-2xl border border-emerald-100 shadow-sm">
                 <button 
@@ -1805,45 +1823,52 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-              {daftarPerangkat.length === 0 && (
-                 <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg">Belum ada data perangkat desa.</div>
-              )}
+            {daftarPerangkat.length === 0 ? (
+               <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg">Belum ada data perangkat desa.</div>
+            ) : (
+              <div className="flex flex-col items-center space-y-12 pb-10">
+                
+                {/* TIER 1: Kepala Desa */}
+                {kadesList.length > 0 && (
+                  <div className="w-full flex justify-center relative z-10">
+                    {kadesList.map((p: any) => <PerangkatCard key={p.id} p={p} isUtama={true} />)}
+                  </div>
+                )}
 
-              {daftarPerangkat.map((p: any) => (
-                <div key={p.id} className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-gray-100 group relative">
-                  {isAdmin && (
-                    <div className="absolute top-4 right-4 z-20 flex gap-2">
-                      <button onClick={() => openEditorPerangkat(p)} className="bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-xl shadow-lg transition">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDeletePerangkat(p.id)} className="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl shadow-lg transition">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                {/* TIER 2: Sekretaris Desa */}
+                {sekdesList.length > 0 && (
+                  <div className="w-full flex justify-center relative z-10">
+                    {/* Garis Vertikal Sambungan (Opsional - Terlihat di Desktop) */}
+                    {kadesList.length > 0 && <div className="hidden md:block absolute -top-12 left-1/2 w-1 h-12 bg-emerald-200 -translate-x-1/2 -z-10"></div>}
+                    
+                    {sekdesList.map((p: any) => <PerangkatCard key={p.id} p={p} isUtama={false} />)}
+                  </div>
+                )}
+
+                {/* TIER 3: Kaur, Kasi, Dll */}
+                {othersList.length > 0 && (
+                  <div className="w-full relative mt-8 pt-8">
+                     {/* Garis Penghubung atas ke Grid (Opsional - Terlihat di Desktop) */}
+                     {(kadesList.length > 0 || sekdesList.length > 0) && (
+                       <>
+                         <div className="hidden md:block absolute top-0 left-1/2 w-1 h-8 bg-emerald-200 -translate-x-1/2"></div>
+                         <div className="hidden md:block absolute top-8 left-[20%] right-[20%] h-1 bg-emerald-200"></div>
+                       </>
+                     )}
+                     
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                      {othersList.map((p: any) => (
+                        <div key={p.id} className="relative pt-6 md:pt-8">
+                          {/* Garis Turun ke Masing-Masing Card (Desktop) */}
+                          <div className="hidden md:block absolute top-0 left-1/2 w-1 h-8 bg-emerald-200 -translate-x-1/2"></div>
+                          <PerangkatCard p={p} isUtama={false} />
+                        </div>
+                      ))}
                     </div>
-                  )}
-                  <div className="relative h-80 overflow-hidden">
-                    <img 
-                      src={p.foto} 
-                      alt={p.nama} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e: any) => {
-                        if (e.target.src !== 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80') {
-                          e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80';
-                        }
-                      }} 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
-                  <div className="p-8 text-center relative bg-white -mt-4 rounded-t-3xl z-10">
-                    <h3 className="text-2xl font-extrabold text-gray-900 mb-2">{p.nama}</h3>
-                    <span className="inline-block bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-1.5 rounded-full font-bold">
-                      {p.jabatan}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -1950,14 +1975,15 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Jabatan</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Jabatan (Berpengaruh pada urutan bagan)</label>
                   <input 
                     type="text" required
                     value={editDataPerangkat.jabatan}
                     onChange={(e) => setEditDataPerangkat({...editDataPerangkat, jabatan: e.target.value})}
-                    placeholder="Contoh: Sekretaris Desa"
+                    placeholder="Ketik 'Kepala Desa' untuk posisi atas"
                     className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
                   />
+                  <p className="text-xs text-gray-500 mt-2 font-medium">*Sistem otomatis membaca teks "Kepala Desa" dan "Sekretaris" untuk meletakkannya di posisi teratas.</p>
                 </div>
 
                 <div>
@@ -2190,7 +2216,7 @@ function HalamanBerita({ isAdmin, daftarBerita, setDaftarBerita, showConfirm }: 
               <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Berita & Informasi</h2>
               <div className="w-24 h-1.5 bg-gradient-to-r from-emerald-600 to-emerald-400 mx-auto rounded-full"></div>
               <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
-                Kabar terbaru seputar kegiatan, pengumuman, dan pembangunan di Desa Delta Upang.
+                Kabar terbaru seputar kegiatan, pengumuman, dan pembangunan di Desa Upang Mulya.
               </p>
             </div>
 
@@ -2410,7 +2436,7 @@ function HalamanKontak() {
                   </div>
                   <div className="pt-1">
                     <h4 className="font-extrabold text-gray-900 text-xl">Email</h4>
-                    <p className="text-gray-600 mt-2 text-lg font-medium">deltaupang12@gmail.com</p>
+                    <p className="text-gray-600 mt-2 text-lg font-medium">upangmulya@gmail.com</p>
                   </div>
                 </div>
               </div>
@@ -2438,7 +2464,7 @@ function HalamanKontak() {
                  <div className="bg-white p-4 rounded-full shadow-2xl mb-4 group-hover:shadow-[0_0_30px_rgba(5,150,105,0.6)] transition-all">
                    <MapPin className="w-10 h-10 text-emerald-600" />
                  </div>
-                 <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4">Lokasi Kantor <br/> Desa Delta Upang</span>
+                 <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4">Lokasi Kantor <br/> Desa Upang Mulya</span>
               </div>
             </div>
           </div>
