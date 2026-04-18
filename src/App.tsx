@@ -939,6 +939,7 @@ export default function App() {
             setDataBeranda={updateBeranda} 
             daftarAgenda={daftarAgenda}
             setDaftarAgenda={updateAgenda}
+            dataGrafik={dataGrafik}
             showConfirm={showConfirm}
             showAlert={showAlert}
           />
@@ -1111,7 +1112,7 @@ export default function App() {
 
 /* ================= Komponen Halaman ================= */
 
-function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daftarAgenda, setDaftarAgenda, showConfirm, showAlert }: any) {
+function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daftarAgenda, setDaftarAgenda, dataGrafik, showConfirm, showAlert }: any) {
   const [showEditor, setShowEditor] = useState(false);
   const [editForm, setEditForm] = useState(dataBeranda);
   
@@ -1344,26 +1345,40 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 text-center">
-            {dataBeranda.stats.map((stat: any) => (
-              <div key={stat.id} className="p-4 sm:p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:bg-white/10 transition-colors flex flex-col justify-center h-full relative overflow-hidden">
-                <div className="text-3xl sm:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md">{stat.num}</div>
-                <div className="text-emerald-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
+            {dataBeranda.stats.map((stat: any) => {
+              // --- SINKRONISASI DATA GRAFIK KE TOTAL PENDUDUK ---
+              let displayNum = stat.num;
+              let displayLaki = stat.subLaki;
+              let displayPerempuan = stat.subPerempuan;
 
-                {stat.id === 1 && (
-                  <div className="flex justify-center gap-2 sm:gap-6 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10 w-full">
-                    <div className="flex flex-col items-center">
-                      <span className="font-extrabold text-white text-sm sm:text-xl">{stat.subLaki || "1.650"}</span>
-                      <span className="text-[9px] sm:text-[11px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center break-words">Laki-laki</span>
+              if (stat.id === 1 && dataGrafik) {
+                const total = (dataGrafik.lakiLaki || 0) + (dataGrafik.perempuan || 0);
+                displayNum = total.toLocaleString('id-ID');
+                displayLaki = (dataGrafik.lakiLaki || 0).toLocaleString('id-ID');
+                displayPerempuan = (dataGrafik.perempuan || 0).toLocaleString('id-ID');
+              }
+
+              return (
+                <div key={stat.id} className="p-4 sm:p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:bg-white/10 transition-colors flex flex-col justify-center h-full relative overflow-hidden">
+                  <div className="text-3xl sm:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md">{displayNum}</div>
+                  <div className="text-emerald-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
+
+                  {stat.id === 1 && (
+                    <div className="flex justify-center gap-2 sm:gap-6 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10 w-full">
+                      <div className="flex flex-col items-center">
+                        <span className="font-extrabold text-white text-sm sm:text-xl">{displayLaki}</span>
+                        <span className="text-[9px] sm:text-[11px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center break-words">Laki-laki</span>
+                      </div>
+                      <div className="w-px bg-white/20"></div>
+                      <div className="flex flex-col items-center">
+                        <span className="font-extrabold text-white text-sm sm:text-xl">{displayPerempuan}</span>
+                        <span className="text-[9px] sm:text-[11px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center break-words">Perempuan</span>
+                      </div>
                     </div>
-                    <div className="w-px bg-white/20"></div>
-                    <div className="flex flex-col items-center">
-                      <span className="font-extrabold text-white text-sm sm:text-xl">{stat.subPerempuan || "1.600"}</span>
-                      <span className="text-[9px] sm:text-[11px] text-emerald-100/90 font-bold uppercase tracking-wider mt-0.5 text-center break-words">Perempuan</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -1645,16 +1660,32 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                    <span className="w-6 h-1 bg-emerald-500 rounded-full mr-3"></span> Pengaturan Angka Statistik Dasar
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {editForm.stats.map((stat: any, index: number) => (
+                  {editForm.stats.map((stat: any, index: number) => {
+                    const isPopulasi = stat.id === 1;
+                    
+                    // Logic Sinkronisasi Display Input Editor
+                    let displayNum = stat.num;
+                    let displayLaki = stat.subLaki || '';
+                    let displayPerempuan = stat.subPerempuan || '';
+
+                    if (isPopulasi && dataGrafik) {
+                      const total = (dataGrafik.lakiLaki || 0) + (dataGrafik.perempuan || 0);
+                      displayNum = total.toLocaleString('id-ID');
+                      displayLaki = (dataGrafik.lakiLaki || 0).toLocaleString('id-ID');
+                      displayPerempuan = (dataGrafik.perempuan || 0).toLocaleString('id-ID');
+                    }
+
+                    return (
                     <div key={stat.id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-3">
                       <div className="font-bold text-gray-500 text-sm border-b pb-1">Kolom {index + 1}</div>
                       <div>
                          <label className="block text-xs font-bold text-gray-700 mb-1">Angka / Jumlah</label>
                          <input 
                            type="text" required
-                           value={stat.num}
+                           value={displayNum}
                            onChange={(e) => handleStatChange(stat.id, 'num', e.target.value)}
-                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" 
+                           disabled={isPopulasi}
+                           className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 ${isPopulasi ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} 
                          />
                       </div>
                       <div>
@@ -1666,30 +1697,33 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" 
                          />
                       </div>
-                      {stat.id === 1 && (
+                      {isPopulasi && (
                         <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100 mt-1">
                           <div>
                             <label className="block text-xs font-bold text-gray-700 mb-1">Laki-laki</label>
                             <input 
-                              type="text" required
-                              value={stat.subLaki || ''}
-                              onChange={(e) => handleStatChange(stat.id, 'subLaki', e.target.value)}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" 
+                              type="text" 
+                              value={displayLaki}
+                              disabled
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" 
                             />
                           </div>
                           <div>
                             <label className="block text-xs font-bold text-gray-700 mb-1">Perempuan</label>
                             <input 
-                              type="text" required
-                              value={stat.subPerempuan || ''}
-                              onChange={(e) => handleStatChange(stat.id, 'subPerempuan', e.target.value)}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" 
+                              type="text" 
+                              value={displayPerempuan}
+                              disabled
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" 
                             />
+                          </div>
+                          <div className="col-span-2 text-[11px] text-amber-600 font-bold mt-1 leading-tight">
+                            *Angka total penduduk otomatis tersinkronisasi dengan data pada menu Grafik Penduduk.
                           </div>
                         </div>
                       )}
                     </div>
-                  ))}
+                  )})}
                 </div>
               </div>
               
