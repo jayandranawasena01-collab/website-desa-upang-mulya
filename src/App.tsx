@@ -24,7 +24,7 @@ let appId = 'desa-upang-mulya';
 // ================= KONFIGURASI DATABASE MANUAL =================
 const firebaseConfigManual = {
   apiKey: "AIzaSyBIl0_tSPDJux9rr2FIL_-ZLZFqLPQ4WCY",
-  authDomain: "web-desa-delta-upang.firebaseapp.com", // Biarkan domain bawaan firebase
+  authDomain: "web-desa-delta-upang.firebaseapp.com",
   projectId: "web-desa-delta-upang",
   storageBucket: "web-desa-delta-upang.firebasestorage.app",
   messagingSenderId: "673276122437",
@@ -90,7 +90,7 @@ const compressImage = (file: any, maxWidth: any, isLogo: any, callback: any) => 
   };
 };
 
-// ================= DATA AWAL DEFAULT (UPANG MULYA) =================
+// ================= DATA AWAL DEFAULT =================
 const initialBerita = [
   {
     id: 1,
@@ -118,13 +118,19 @@ const initialBerita = [
   }
 ];
 
+// DATA STRUKTUR SESUAI GAMBAR
 const initialPerangkat = [
-  { id: 1, nama: "Hasanuddin, S.IP", jabatan: "Kepala Desa", foto: "https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-  { id: 2, nama: "Ahmad Yani, S.Pd.", jabatan: "Sekretaris Desa", foto: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-  { id: 3, nama: "Siti Rahmawati", jabatan: "Kaur Keuangan", foto: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-  { id: 4, nama: "Budi Santoso", jabatan: "Kaur Perencanaan", foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-  { id: 5, nama: "Dewi Lestari", jabatan: "Kasi Pemerintahan", foto: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-  { id: 6, nama: "Herman Pelani", jabatan: "Kasi Kesejahteraan", foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 1, nama: "SUBERO", jabatan: "KEPALA DESA", foto: "https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 2, nama: "SUPENO", jabatan: "SEKRETARIS DESA", foto: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 3, nama: "SUYANTO", jabatan: "KASI KESRA", foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 4, nama: "SOLEKAN", jabatan: "KASI PEMERINTAHAN", foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 5, nama: "OCTARIO SAKTI SUSILO", jabatan: "KASI PELAYANAN", foto: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 6, nama: "KHOIRUL ANAM", jabatan: "KAUR TATA USAHA DAN UMUM", foto: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 7, nama: "AHMAD FARIS SEPTIAN N", jabatan: "KAUR KEUANGAN", foto: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 8, nama: "MARKUWAT", jabatan: "KAUR PERENCANAAN", foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 9, nama: "HERU EKO W", jabatan: "KASUN I", foto: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 10, nama: "CAHYO DIMAS", jabatan: "KASUN II", foto: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+  { id: 11, nama: "WAHYU SETYO B", jabatan: "KASUN III", foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" }
 ];
 
 const initialLembaga = [
@@ -472,6 +478,20 @@ export default function App() {
             display: inline-block;
             white-space: nowrap;
             animation: roll-left 15s linear infinite;
+          }
+          .custom-scrollbar::-webkit-scrollbar {
+            height: 12px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 8px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d1d5db; 
+            border-radius: 8px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; 
           }
         `}
       </style>
@@ -1657,7 +1677,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
   );
 }
 
-// ============== HALAMAN PEMERINTAHAN (DENGAN STRUKTUR BAGAN) ==============
+// ============== HALAMAN PEMERINTAHAN (STRUKTUR SOTK PERSIS GAMBAR) ==============
 function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPerangkat, daftarLembaga, setDaftarLembaga, showConfirm }: any) {
   const isPerangkat = activeTab === 'perangkat' || !activeTab;
   
@@ -1748,47 +1768,38 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   };
 
   // ----- PEMISAHAN KATEGORI UNTUK BAGAN STRUKTUR -----
-  const kadesList = daftarPerangkat.filter((p: any) => p.jabatan.toLowerCase().includes('kepala desa') || p.jabatan.toLowerCase() === 'kades');
-  const sekdesList = daftarPerangkat.filter((p: any) => p.jabatan.toLowerCase().includes('sekretaris') || p.jabatan.toLowerCase() === 'sekdes');
-  const othersList = daftarPerangkat.filter((p: any) => 
-    !p.jabatan.toLowerCase().includes('kepala desa') && 
-    p.jabatan.toLowerCase() !== 'kades' &&
-    !p.jabatan.toLowerCase().includes('sekretaris') &&
-    p.jabatan.toLowerCase() !== 'sekdes'
-  );
+  const kadesList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KEPALA DESA') || p.jabatan.toUpperCase() === 'KADES');
+  const sekdesList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('SEKRETARIS'));
+  const kasiList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KASI'));
+  const kaurList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KAUR'));
+  const kasunList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KASUN') || p.jabatan.toUpperCase().includes('DUSUN'));
 
-  // Helper untuk merender Card
-  const PerangkatCard = ({ p, isUtama }: any) => (
-    <div className={`bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-gray-100 group relative ${isUtama ? 'w-full max-w-[320px] mx-auto ring-4 ring-emerald-500/20' : 'w-full'}`}>
-      {isAdmin && (
-        <div className="absolute top-4 right-4 z-20 flex gap-2">
-          <button onClick={() => openEditorPerangkat(p)} className="bg-amber-500 hover:bg-amber-600 text-white p-2.5 rounded-xl shadow-lg transition">
-            <Edit className="w-4 h-4" />
-          </button>
-          <button onClick={() => handleDeletePerangkat(p.id)} className="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl shadow-lg transition">
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-      <div className={`relative ${isUtama ? 'h-[360px]' : 'h-80'} overflow-hidden`}>
-        <img 
-          src={p.foto} 
-          alt={p.nama} 
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onError={(e: any) => {
-            if (e.target.src !== 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80') {
-              e.target.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80';
-            }
-          }} 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      </div>
-      <div className={`p-8 text-center relative bg-white -mt-4 rounded-t-3xl z-10 ${isUtama ? 'pb-10' : ''}`}>
-        <h3 className={`${isUtama ? 'text-3xl' : 'text-2xl'} font-extrabold text-gray-900 mb-2`}>{p.nama}</h3>
-        <span className={`inline-block border text-sm px-4 py-1.5 rounded-full font-bold ${isUtama ? 'bg-emerald-600 border-emerald-700 text-white shadow-md' : 'bg-emerald-50 border-emerald-200 text-emerald-800'}`}>
-          {p.jabatan}
-        </span>
-      </div>
+  // Desain Card Perangkat Persis Screenshot
+  const PerangkatCard = ({ p }: any) => (
+    <div className="bg-white border-[3px] border-black overflow-hidden relative w-[160px] flex flex-col items-center shadow-lg group">
+       {isAdmin && (
+         <div className="absolute top-1 right-1 z-20 flex gap-1 bg-white/90 p-1 rounded backdrop-blur border border-black">
+           <button onClick={() => openEditorPerangkat(p)} className="text-amber-600 hover:text-amber-800 p-1"><Edit className="w-3.5 h-3.5" /></button>
+           <button onClick={() => handleDeletePerangkat(p.id)} className="text-rose-600 hover:text-rose-800 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
+         </div>
+       )}
+       
+       <div className="w-full h-[180px] bg-red-600 border-b-[3px] border-black">
+          <img 
+            src={p.foto} 
+            alt={p.nama} 
+            className="w-full h-full object-cover"
+            onError={(e: any) => {
+              if (e.target.src !== 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=400&q=80') {
+                e.target.src = 'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=400&q=80';
+              }
+            }} 
+          />
+       </div>
+       <div className="p-3 text-center w-full bg-white flex flex-col items-center justify-center min-h-[70px]">
+          <h3 className="text-[13px] font-black text-black leading-tight mb-1 underline uppercase text-center">{p.nama}</h3>
+          <span className="text-[11px] font-bold text-black uppercase text-center leading-tight">{p.jabatan}</span>
+       </div>
     </div>
   );
 
@@ -1811,9 +1822,9 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
 
         {/* =========== TAMPILAN PERANGKAT DESA (HIERARKI BAGAN) =========== */}
         {isPerangkat && (
-          <div className="animate-in fade-in duration-500 max-w-6xl mx-auto">
+          <div className="animate-in fade-in duration-500 max-w-full">
             {isAdmin && (
-              <div className="mb-10 flex justify-end bg-emerald-50 p-4 rounded-2xl border border-emerald-100 shadow-sm">
+              <div className="mb-10 flex justify-end bg-emerald-50 p-4 rounded-2xl border border-emerald-100 shadow-sm max-w-6xl mx-auto">
                 <button 
                   onClick={() => openEditorPerangkat()} 
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(5,150,105,0.3)] hover:shadow-[0_10px_25px_rgba(5,150,105,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
@@ -1824,49 +1835,91 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
             )}
 
             {daftarPerangkat.length === 0 ? (
-               <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg">Belum ada data perangkat desa.</div>
+               <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg max-w-6xl mx-auto">Belum ada data perangkat desa.</div>
             ) : (
-              <div className="flex flex-col items-center space-y-12 pb-10">
-                
-                {/* TIER 1: Kepala Desa */}
-                {kadesList.length > 0 && (
-                  <div className="w-full flex justify-center relative z-10">
-                    {kadesList.map((p: any) => <PerangkatCard key={p.id} p={p} isUtama={true} />)}
-                  </div>
-                )}
+              <div className="w-full overflow-x-auto pb-10 custom-scrollbar">
+                <div className="min-w-[1300px] w-max mx-auto relative pt-10 flex flex-col items-center">
+                  
+                  {/* TIER 1: BPD & KADES */}
+                  <div className="relative w-full flex justify-center mb-[60px]">
+                     {/* BPD BOX */}
+                     <div className="absolute left-[15%] top-[80px] flex items-center">
+                        <div className="bg-white border-[3px] border-black font-black text-2xl px-10 py-6 z-10 shadow-md">BPD</div>
+                        {/* Garis Putus-Putus BPD ke KADES */}
+                        <div className="w-[300px] border-b-[4px] border-dashed border-black"></div>
+                     </div>
 
-                {/* TIER 2: Sekretaris Desa */}
-                {sekdesList.length > 0 && (
-                  <div className="w-full flex justify-center relative z-10">
-                    {/* Garis Vertikal Sambungan (Opsional - Terlihat di Desktop) */}
-                    {kadesList.length > 0 && <div className="hidden md:block absolute -top-12 left-1/2 w-1 h-12 bg-emerald-200 -translate-x-1/2 -z-10"></div>}
-                    
-                    {sekdesList.map((p: any) => <PerangkatCard key={p.id} p={p} isUtama={false} />)}
-                  </div>
-                )}
+                     {/* KADES */}
+                     <div className="relative z-10">
+                        {kadesList.map((p: any) => <PerangkatCard key={p.id} p={p} />)}
+                     </div>
 
-                {/* TIER 3: Kaur, Kasi, Dll */}
-                {othersList.length > 0 && (
-                  <div className="w-full relative mt-8 pt-8">
-                     {/* Garis Penghubung atas ke Grid (Opsional - Terlihat di Desktop) */}
-                     {(kadesList.length > 0 || sekdesList.length > 0) && (
-                       <>
-                         <div className="hidden md:block absolute top-0 left-1/2 w-1 h-8 bg-emerald-200 -translate-x-1/2"></div>
-                         <div className="hidden md:block absolute top-8 left-[20%] right-[20%] h-1 bg-emerald-200"></div>
-                       </>
-                     )}
+                     {/* TANGKAI UTAMA VERTIKAL - MULAI */}
+                     <div className="absolute top-[256px] left-1/2 w-1 h-[60px] bg-black -translate-x-1/2 z-0"></div>
+                  </div>
+
+                  {/* TIER 2 & 3: KASI, SEKDES, KAUR */}
+                  <div className="relative w-full min-h-[500px] flex justify-between px-[5%]">
                      
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                      {othersList.map((p: any) => (
-                        <div key={p.id} className="relative pt-6 md:pt-8">
-                          {/* Garis Turun ke Masing-Masing Card (Desktop) */}
-                          <div className="hidden md:block absolute top-0 left-1/2 w-1 h-8 bg-emerald-200 -translate-x-1/2"></div>
-                          <PerangkatCard p={p} isUtama={false} />
+                     {/* TANGKAI UTAMA VERTIKAL - LANJUTAN KE BAWAH */}
+                     <div className="absolute top-0 left-1/2 w-1 h-full bg-black -translate-x-1/2 z-0"></div>
+
+                     {/* GARIS HORIZONTAL KASI KE SEKDES */}
+                     <div className="absolute top-0 left-[18%] right-[25%] h-1 bg-black z-0"></div>
+
+                     {/* KIRI: DAFTAR KASI */}
+                     <div className="w-[45%] flex justify-between pr-[8%]">
+                        {kasiList.map((p: any) => (
+                           <div key={p.id} className="relative pt-8">
+                               <div className="absolute top-0 left-1/2 w-1 h-8 bg-black -translate-x-1/2 z-0"></div>
+                               <PerangkatCard p={p} />
+                           </div>
+                        ))}
+                     </div>
+
+                     {/* KANAN: SEKDES & DAFTAR KAUR */}
+                     <div className="w-[45%] relative flex flex-col items-center pl-[5%]">
+                        {/* SEKDES */}
+                        <div className="relative pt-8 w-full flex justify-center">
+                           <div className="absolute top-0 left-1/2 w-1 h-8 bg-black -translate-x-1/2 z-0"></div>
+                           {sekdesList.map((p: any) => <PerangkatCard key={p.id} p={p} />)}
+                           
+                           {/* Tangkai dari Sekdes turun ke Kaur */}
+                           <div className="absolute top-full left-1/2 w-1 h-[60px] bg-black -translate-x-1/2 z-0"></div>
                         </div>
-                      ))}
-                    </div>
+
+                        {/* KAUR */}
+                        <div className="relative mt-[60px] w-[130%] flex justify-between">
+                           {/* Garis Horizontal Kaur */}
+                           <div className="absolute top-0 left-[15%] right-[15%] h-1 bg-black z-0"></div>
+                           {kaurList.map((p: any) => (
+                              <div key={p.id} className="relative pt-8">
+                                 <div className="absolute top-0 left-1/2 w-1 h-8 bg-black -translate-x-1/2 z-0"></div>
+                                 <PerangkatCard p={p} />
+                              </div>
+                           ))}
+                        </div>
+                     </div>
+
                   </div>
-                )}
+
+                  {/* TIER 4: KASUN (BAWAH TENGAH) */}
+                  <div className="relative w-full flex justify-center mt-[-30px]">
+                     <div className="w-[60%] flex justify-between relative pt-10">
+                        {/* Garis Horizontal Kasun */}
+                        <div className="absolute top-0 left-[10%] right-[10%] h-1 bg-black z-0"></div>
+                        
+                        {kasunList.map((p: any, idx: number) => (
+                           <div key={p.id} className="relative">
+                              {/* Sambungan vertikal untuk semua Kasun ke garis horizontal */}
+                              <div className="absolute top-[-40px] left-1/2 w-1 h-10 bg-black -translate-x-1/2 z-0"></div>
+                              <PerangkatCard p={p} />
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+
+                </div>
               </div>
             )}
           </div>
@@ -1983,7 +2036,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                     placeholder="Ketik 'Kepala Desa' untuk posisi atas"
                     className="w-full px-5 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium" 
                   />
-                  <p className="text-xs text-gray-500 mt-2 font-medium">*Sistem otomatis membaca teks "Kepala Desa" dan "Sekretaris" untuk meletakkannya di posisi teratas.</p>
+                  <p className="text-xs text-gray-500 mt-2 font-medium">*Sistem membaca teks KEPALA DESA, SEKRETARIS, KASI, KAUR, dan KASUN untuk diletakkan ke posisinya masing-masing.</p>
                 </div>
 
                 <div>
