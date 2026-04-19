@@ -97,7 +97,8 @@ const compressImage = (file: any, maxWidth: any, isLogo: any, callback: any) => 
       if (ctx) {
         ctx.drawImage(img, 0, 0, width, height);
         const format = isLogo ? 'image/png' : 'image/jpeg';
-        const quality = isLogo ? undefined : 0.6; // Dinaikkan karena sudah pakai Storage
+        // Kualitas diturunkan sedikit dari 0.6 menjadi 0.5 agar lebih ringan di-upload tapi tetap bagus
+        const quality = isLogo ? undefined : 0.5; 
         const compressedBase64 = canvas.toDataURL(format, quality);
         callback(compressedBase64);
       } else {
@@ -1218,10 +1219,13 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
     e.preventDefault();
     setIsSaving(true);
     try {
-      let heroBg = await uploadBase64ToStorage(editForm.heroBg, 'beranda');
-      let logoHero = await uploadBase64ToStorage(editForm.logoHero, 'beranda');
-      let headerLogo = await uploadBase64ToStorage(editForm.headerLogo, 'beranda');
-      let fotoKades = await uploadBase64ToStorage(editForm.fotoKades, 'beranda');
+      // PERBAIKAN: Gunakan Promise.all agar 4 gambar diupload secara PARALEL (Bersamaan)
+      const [heroBg, logoHero, headerLogo, fotoKades] = await Promise.all([
+        uploadBase64ToStorage(editForm.heroBg, 'beranda'),
+        uploadBase64ToStorage(editForm.logoHero, 'beranda'),
+        uploadBase64ToStorage(editForm.headerLogo, 'beranda'),
+        uploadBase64ToStorage(editForm.fotoKades, 'beranda')
+      ]);
 
       const finalData = { ...editForm, heroBg, logoHero, headerLogo, fotoKades };
       
@@ -2856,11 +2860,13 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, dataGrafik, updateGra
     e.preventDefault();
     setIsSaving(true);
     try {
-      let gambar = await uploadBase64ToStorage(editDataBerita.gambar, 'berita');
-      
-      let galeri = await Promise.all((editDataBerita.galeri || []).map(async (g: any) => ({
-         ...g, url: await uploadBase64ToStorage(g.url, 'galeri_berita')
-      })));
+      // PERBAIKAN: Upload gambar utama & galeri tambahan secara PARALEL agar jauh lebih cepat
+      const [gambar, galeri] = await Promise.all([
+        uploadBase64ToStorage(editDataBerita.gambar, 'berita'),
+        Promise.all((editDataBerita.galeri || []).map(async (g: any) => ({
+           ...g, url: await uploadBase64ToStorage(g.url, 'galeri_berita')
+        })))
+      ]);
 
       const finalData = { ...editDataBerita, gambar, galeri };
 
@@ -3442,97 +3448,6 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, dataGrafik, updateGra
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function HalamanKontak() {
-  return (
-    <div className="animate-in fade-in zoom-in-95 duration-500 py-16 bg-gray-50 min-h-[70vh]">
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="text-center mb-16">
-          <span className="text-indigo-600 font-bold tracking-widest uppercase text-sm mb-2 block">Layanan Pengaduan</span>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Hubungi Kami</h2>
-          <div className="w-24 h-1.5 bg-gradient-to-r from-indigo-600 to-indigo-400 mx-auto rounded-full"></div>
-          <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
-            Punya pertanyaan, masukan, atau perlu layanan dari Pemerintah Desa? Silakan kunjungi atau hubungi kami.
-          </p>
-        </div>
-
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
-          <div className="bg-white p-10 md:p-12 rounded-3xl shadow-xl border border-gray-100 h-full flex flex-col justify-between relative overflow-hidden">
-             <div className="absolute bottom-0 right-0 w-40 h-40 bg-indigo-50 rounded-tl-full -z-10"></div>
-
-            <div>
-              <h3 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">Informasi Kontak</h3>
-              <div className="space-y-8">
-                <div className="flex items-start group">
-                  <div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600 mr-5 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-sm border border-indigo-100 group-hover:border-indigo-600">
-                    <MapPin className="w-7 h-7" />
-                  </div>
-                  <div className="pt-1">
-                    <h4 className="font-extrabold text-gray-900 text-xl">Alamat Kantor Desa</h4>
-                    <p className="text-gray-600 leading-relaxed mt-2 text-lg">
-                      Jl. Sunan Kalijaga Dusun II, Rt. 01 Rw. 01<br/>
-                      Kecamatan Makarti Jaya, Kabupaten Banyuasin<br/>
-                      Provinsi Sumatera Selatan, 30972
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start group">
-                  <div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600 mr-5 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-sm border border-indigo-100 group-hover:border-indigo-600">
-                    <Phone className="w-7 h-7" />
-                  </div>
-                  <div className="pt-1">
-                    <h4 className="font-extrabold text-gray-900 text-xl">Telepon / WhatsApp</h4>
-                    <p className="text-gray-600 mt-2 text-lg font-medium">+62 852-7971-1678</p>
-                  </div>
-                </div>
-                <div className="flex items-start group">
-                  <div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600 mr-5 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-sm border border-indigo-100 group-hover:border-indigo-600">
-                    <Mail className="w-7 h-7" />
-                  </div>
-                  <div className="pt-1">
-                    <h4 className="font-extrabold text-gray-900 text-xl">Email</h4>
-                    <p className="text-gray-600 mt-2 text-lg font-medium">upangmulya@gmail.com</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-12 pt-8 border-t border-gray-100 bg-gray-50 -mx-10 -mb-10 p-10 md:p-12 rounded-b-3xl">
-              <h4 className="font-extrabold text-gray-900 mb-5 text-xl">Jam Pelayanan Masyarakat:</h4>
-              <ul className="text-gray-700 space-y-3 text-lg">
-                <li className="flex justify-between items-center bg-white p-3 px-4 rounded-xl shadow-sm border border-gray-100"><span className="font-bold">Senin - Kamis</span> <span className="text-indigo-700 font-bold bg-indigo-50 px-3 py-1 rounded-lg">08.00 - 15.00 WIB</span></li>
-                <li className="flex justify-between items-center bg-white p-3 px-4 rounded-xl shadow-sm border border-gray-100"><span className="font-bold">Jumat</span> <span className="text-indigo-700 font-bold bg-indigo-50 px-3 py-1 rounded-lg">08.00 - 11.30 WIB</span></li>
-                <li className="flex justify-between items-center bg-rose-50 p-3 px-4 rounded-xl shadow-sm border border-rose-100"><span className="font-bold text-rose-800">Sabtu - Minggu</span> <span className="text-rose-700 font-bold">Tutup</span></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="bg-white p-3 rounded-3xl shadow-xl h-full min-h-[500px] border border-gray-100">
-            <a 
-              href="https://maps.app.goo.gl/ZNSJokDqvJHrnMtP9" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="block w-full h-full bg-gray-100 rounded-2xl flex flex-col items-center justify-center text-gray-500 overflow-hidden relative group cursor-pointer"
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Peta" 
-                className="w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:opacity-80 transition-all duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>
-              <div className="absolute inset-0 flex flex-col items-center justify-center transition-transform duration-300 group-hover:-translate-y-2">
-                 <div className="bg-white p-4 rounded-full shadow-2xl mb-4 group-hover:shadow-[0_0_30px_rgba(67,56,202,0.6)] transition-all">
-                   <MapPin className="w-10 h-10 text-indigo-600" />
-                 </div>
-                 <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4">Lokasi Kantor <br/> Desa Upang Mulya</span>
-              </div>
-            </a>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
