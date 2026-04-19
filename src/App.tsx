@@ -1060,7 +1060,7 @@ export default function App() {
                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-indigo-900/50 transition mr-4">
                     <Phone className="w-5 h-5 text-indigo-400" />
                   </div>
-                  <span>0822-6876-4585</span>
+                  <span>0852-7971-1678</span>
                 </li>
                 <li className="flex items-center group">
                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-indigo-900/50 transition mr-4">
@@ -1080,7 +1080,7 @@ export default function App() {
       {/* Floating WhatsApp Button */}
       {currentPage === 'kontak' && (
         <a
-          href="https://wa.me/6282268764585"
+          href="https://wa.me/6285279711678"
           target="_blank"
           rel="noopener noreferrer"
           className="fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-[#25D366] hover:bg-[#128C7E] text-white p-4 rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.5)] z-50 flex items-center justify-center transition-all duration-300 hover:scale-110 animate-in fade-in slide-in-from-bottom-10 group"
@@ -3479,7 +3479,7 @@ function HalamanKontak() {
                   </div>
                   <div className="pt-1">
                     <h4 className="font-extrabold text-gray-900 text-xl">Telepon / WhatsApp</h4>
-                    <p className="text-gray-600 mt-2 text-lg font-medium">+62 822-6876-4585</p>
+                    <p className="text-gray-600 mt-2 text-lg font-medium">+62 852-7971-1678</p>
                   </div>
                 </div>
                 <div className="flex items-start group">
