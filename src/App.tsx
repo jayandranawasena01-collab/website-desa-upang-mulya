@@ -4,15 +4,13 @@ import {
   MapPin, Mail, ChevronRight, Landmark, ArrowRight,
   LogIn, LogOut, Edit, Trash2, Plus, Image as ImageIcon, Save, Upload, CheckCircle2,
   BookOpen, Target, Map, Building2, ChevronDown, CalendarDays, PieChart, TrendingUp, Activity,
-  ChevronLeft, ChevronsLeft, ChevronsRight, Loader2
+  ChevronLeft, ChevronsLeft, ChevronsRight
 } from 'lucide-react';
 
 // ================= FIREBASE CLOUD STORAGE SETUP =================
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { initializeFirestore, doc, setDoc, onSnapshot, collection, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
-// PERBAIKAN OPTIMASI: Menggunakan uploadBytes (Blob) yang jauh lebih cepat daripada uploadString (Base64)
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { initializeFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 // Deklarasi global agar TypeScript di Vercel tidak error
 declare const __firebase_config: any;
@@ -22,7 +20,6 @@ declare const __initial_auth_token: any;
 let app: any = null;
 let auth: any = null;
 let db: any = null;
-let storage: any = null;
 let appId = 'desa-upang-mulya';
 
 // ================= KONFIGURASI DATABASE MANUAL =================
@@ -50,38 +47,11 @@ if (typeof window !== 'undefined') {
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
       db = initializeFirestore(app, { experimentalForceLongPolling: true });
-      storage = getStorage(app);
     }
   } catch (err) {
     console.warn("Menjalankan aplikasi dalam mode lokal.");
   }
 }
-
-// ================= FUNGSI UPLOAD KE STORAGE (DIPERCEPAT) =================
-export const uploadBase64ToStorage = async (base64String: string, folderName: string) => {
-  if (!base64String || !base64String.startsWith('data:image')) return base64String;
-  if (!storage) return base64String; 
-  
-  try {
-    // Tentukan ekstensi file
-    const isPng = base64String.startsWith('data:image/png');
-    const extension = isPng ? 'png' : 'jpg';
-    const filename = `${folderName}_${Date.now()}_${Math.random().toString(36).substring(7)}.${extension}`;
-    const storageRef = ref(storage, `images/${appId}/${folderName}/${filename}`);
-    
-    // OPTIMASI: Konversi Base64 menjadi Blob Biner mentah. 
-    // Mengupload Blob 2x lebih cepat daripada mengupload teks Base64 via uploadString.
-    const response = await fetch(base64String);
-    const blob = await response.blob();
-    
-    await uploadBytes(storageRef, blob);
-    const downloadUrl = await getDownloadURL(storageRef);
-    return downloadUrl;
-  } catch (error) {
-    console.error("Gagal upload gambar ke Storage:", error);
-    return base64String; 
-  }
-};
 
 // ================= FUNGSI KOMPRESI GAMBAR OTOMATIS =================
 const compressImage = (file: any, maxWidth: any, isLogo: any, callback: any) => {
@@ -106,8 +76,7 @@ const compressImage = (file: any, maxWidth: any, isLogo: any, callback: any) => 
       if (ctx) {
         ctx.drawImage(img, 0, 0, width, height);
         const format = isLogo ? 'image/png' : 'image/jpeg';
-        // Kualitas 0.5 cukup untuk menekan ukuran drastis namun visual tetap bagus di layar
-        const quality = isLogo ? undefined : 0.5; 
+        const quality = isLogo ? undefined : 0.4;
         const compressedBase64 = canvas.toDataURL(format, quality);
         callback(compressedBase64);
       } else {
@@ -239,9 +208,11 @@ export default function App() {
   const [dbError, setDbError] = useState(""); 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // State Active Pages & Tabs
+  // State Active Pages & Tabs disimpan di localStorage agar tidak kembali ke beranda saat refresh
   const [currentPage, setCurrentPage] = useState(() => {
-    if (typeof window !== 'undefined') return localStorage.getItem('upang_mulya_currentPage') || 'beranda';
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('upang_mulya_currentPage') || 'beranda';
+    }
     return 'beranda';
   });
 
@@ -254,15 +225,20 @@ export default function App() {
   });
 
   const [activePemerintahTab, setActivePemerintahTab] = useState(() => {
-    if (typeof window !== 'undefined') return localStorage.getItem('upang_mulya_activePemerintahTab') || 'perangkat';
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('upang_mulya_activePemerintahTab') || 'perangkat';
+    }
     return 'perangkat';
   });
 
   const [activeBeritaTab, setActiveBeritaTab] = useState(() => {
-    if (typeof window !== 'undefined') return localStorage.getItem('upang_mulya_activeBeritaTab') || 'list-berita';
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('upang_mulya_activeBeritaTab') || 'list-berita';
+    }
     return 'list-berita';
   });
   
+  // States untuk mengatur dropdown
   const [isDesktopProfilOpen, setIsDesktopProfilOpen] = useState(false);
   const [isMobileProfilOpen, setIsMobileProfilOpen] = useState(false);
   const [isDesktopPemerintahOpen, setIsDesktopPemerintahOpen] = useState(false);
@@ -270,8 +246,11 @@ export default function App() {
   const [isDesktopBeritaOpen, setIsDesktopBeritaOpen] = useState(false);
   const [isMobileBeritaOpen, setIsMobileBeritaOpen] = useState(false);
   
+  // State Admin
   const [isAdmin, setIsAdmin] = useState(() => {
-    if (typeof window !== 'undefined') return localStorage.getItem('upang_mulya_admin') === 'true';
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('upang_mulya_admin') === 'true';
+    }
     return false;
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -331,7 +310,7 @@ export default function App() {
       } catch (error: any) {
         console.error("Auth error:", error.message);
         if (error.code === 'auth/operation-not-allowed' || error.code === 'auth/configuration-not-found') {
-          setDbError("Autentikasi Firebase gagal. Pastikan metode 'Anonymous Login' sudah diaktifkan.");
+          setDbError("Autentikasi Firebase gagal. Pastikan metode 'Anonymous Login' sudah Anda aktifkan di menu Authentication Firebase Console.");
         } else {
           setDbError(`Firebase Error: ${error.message}`);
         }
@@ -349,110 +328,83 @@ export default function App() {
     };
   }, []);
 
-  // ================= FETCH DATA (MIGRASI KE COLLECTION) =================
+  // ================= FETCH DATA =================
   useEffect(() => {
+    // PENTING: Tunggu hingga Firebase database DAN user auth token (anonymous/custom) tersedia.
+    // Jika tidak, permintaan baca data ini akan diblokir oleh aturan izin (permission denied).
     if (!db || !user) return; 
+
+    const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
+      setIsDbConnected(true); 
+      setDbError(""); 
+      if (snap.exists()) {
+        const val = snap.data().value;
+        const parsedData = typeof val === 'string' ? JSON.parse(val) : val;
+        
+        stateSetter(parsedData);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(storageKey, JSON.stringify(parsedData));
+        }
+      }
+    };
 
     const handleServerError = (err: any) => {
       console.error("Gagal sinkronisasi data:", err);
       setIsDbConnected(false);
       if (err.code === 'permission-denied') {
-        setDbError("Akses Database Ditolak! Cek rules Firestore.");
+        setDbError("Akses Database Ditolak! Masuk ke Firebase Console Anda, buka menu Firestore Database, klik tab 'Rules', lalu ubah isinya menjadi 'allow read, write: if true;' dan klik Publish.");
       }
     };
 
-    setIsDbConnected(true);
-    setDbError("");
-
-    // --- Beranda & Grafik tetap single document karena bukan list/array ---
     const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_beranda', 'main'), 
-      (snap) => {
-        if (snap.exists()) {
-          // Backward compatibility cek jika format lama (stringified JSON)
-          const val = snap.data().value;
-          const data = val ? (typeof val === 'string' ? JSON.parse(val) : val) : snap.data();
-          setDataBeranda(data);
-          if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_beranda', JSON.stringify(data));
-        }
-      }, handleServerError
+      (snap) => handleServerData(snap, setDataBeranda, 'upang_mulya_beranda'), handleServerError
     );
 
-    const unsubGrafik = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_grafik', 'main'), 
-      (snap) => {
-        if (snap.exists()) {
-          const val = snap.data().value;
-          const data = val ? (typeof val === 'string' ? JSON.parse(val) : val) : snap.data();
-          setDataGrafik(data);
-          if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_grafik', JSON.stringify(data));
-        }
-      }, handleServerError
-    );
-
-    // --- List dipindah ke Collection agar tidak membebani 1 Dokumen ---
-    const unsubBerita = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_berita_list'), 
-      (snap) => {
-        if (!snap.empty) {
-          const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          const sorted = data.sort((a:any, b:any) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
-          setDaftarBerita(sorted);
-          if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_berita', JSON.stringify(sorted));
-        }
-      }, handleServerError
+    const unsubBerita = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_berita', 'main'), 
+      (snap) => handleServerData(snap, setDaftarBerita, 'upang_mulya_berita'), handleServerError
     );
     
-    const unsubAgenda = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_agenda_list'), 
-      (snap) => {
-        if (!snap.empty) {
-          const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setDaftarAgenda(data);
-          if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_agenda', JSON.stringify(data));
-        }
-      }, handleServerError
+    const unsubGrafik = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_grafik', 'main'), 
+      (snap) => handleServerData(snap, setDataGrafik, 'upang_mulya_grafik'), handleServerError
     );
 
-    const unsubPerangkat = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_perangkat_list'), 
-      (snap) => {
-        if (!snap.empty) {
-          const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setDaftarPerangkat(data);
-          if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_perangkat', JSON.stringify(data));
-        }
-      }, handleServerError
+    const unsubAgenda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_agenda', 'main'), 
+      (snap) => handleServerData(snap, setDaftarAgenda, 'upang_mulya_agenda'), handleServerError
     );
 
-    const unsubLembaga = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_lembaga_list'), 
-      (snap) => {
-        if (!snap.empty) {
-          const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setDaftarLembaga(data);
-          if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_lembaga', JSON.stringify(data));
-        }
-      }, handleServerError
+    const unsubPerangkat = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_perangkat', 'main'), 
+      (snap) => handleServerData(snap, setDaftarPerangkat, 'upang_mulya_perangkat'), handleServerError
     );
 
-    const unsubProfil = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_profil_list'), 
-      (snap) => {
-        if (!snap.empty) {
-          const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setDaftarProfil(data);
-          if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_profil', JSON.stringify(data));
-        }
-      }, handleServerError
+    const unsubLembaga = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_lembaga', 'main'), 
+      (snap) => handleServerData(snap, setDaftarLembaga, 'upang_mulya_lembaga'), handleServerError
+    );
+
+    const unsubProfil = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_profil', 'main'), 
+      (snap) => handleServerData(snap, setDaftarProfil, 'upang_mulya_profil'), handleServerError
     );
 
     return () => {
       unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil();
     };
-  }, [user]);
+  }, [user]); // Dependensi user ditambahkan agar fungsi berjalan HANYA jika terautentikasi
 
-  // ================= SAVE GLOBAL FUNCTION UNTUK BERANDA/GRAFIK =================
+  // ================= UPDATE FUNCTIONS =================
   const updateBeranda = async (newData: any) => {
     setDataBeranda(newData);
     if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_beranda', JSON.stringify(newData));
     if(db && user) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_beranda', 'main'), newData); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_beranda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     } else {
       showAlert("Perubahan disimpan secara LOKAL. Aktifkan koneksi database untuk mensinkronisasi.");
+    }
+  };
+  
+  const updateBerita = async (newData: any) => {
+    setDaftarBerita(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_berita', JSON.stringify(newData));
+    if(db && user) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_berita', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
   
@@ -460,7 +412,37 @@ export default function App() {
     setDataGrafik(newData);
     if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_grafik', JSON.stringify(newData));
     if(db && user) {
-      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_grafik', 'main'), newData); } catch(e) { console.error(e); }
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_grafik', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
+  };
+
+  const updateAgenda = async (newData: any) => {
+    setDaftarAgenda(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_agenda', JSON.stringify(newData));
+    if(db && user) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_agenda', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
+  };
+
+  const updatePerangkat = async (newData: any) => {
+    setDaftarPerangkat(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_perangkat', JSON.stringify(newData));
+    if(db && user) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_perangkat', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
+  };
+  const updateLembaga = async (newData: any) => {
+    setDaftarLembaga(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_lembaga', JSON.stringify(newData));
+    if(db && user) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_lembaga', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
+    }
+  };
+  const updateProfil = async (newData: any) => {
+    setDaftarProfil(newData);
+    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_profil', JSON.stringify(newData));
+    if(db && user) {
+      try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_profil', 'main'), { value: JSON.stringify(newData) }); } catch(e) { console.error(e); }
     }
   };
 
@@ -475,7 +457,9 @@ export default function App() {
   }, []);
 
   useEffect(() => { 
-    if (typeof window !== 'undefined') window.scrollTo(0, 0); 
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0); 
+    }
   }, [currentPage, activeProfilTab, activePemerintahTab, activeBeritaTab]);
 
   useEffect(() => { 
@@ -486,10 +470,13 @@ export default function App() {
 
   const navigateTo = (page: string, tabId: any = null) => {
     setCurrentPage(page);
-    if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_currentPage', page);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('upang_mulya_currentPage', page);
+    }
 
     if (page === 'profil' && tabId !== null) {
       setActiveProfilTab(tabId);
+      // Diubah ke string untuk keamanan penyimpanan local storage
       if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_activeProfilTab', String(tabId));
     }
     if (page === 'pemerintah' && tabId !== null) {
@@ -960,7 +947,7 @@ export default function App() {
         <div className="bg-indigo-100 text-indigo-800 px-4 py-3 text-sm font-medium text-center shadow-inner flex flex-col items-center justify-center gap-2 z-30 relative">
            <div className="flex items-center gap-2">
              <CheckCircle2 className="w-5 h-5 text-indigo-600" /> 
-             <span>Mode Admin Aktif: Sistem Penyimpanan Firebase Storage Berjalan.</span>
+             <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
            </div>
            
            {!isDbConnected && !dbError && (
@@ -989,24 +976,22 @@ export default function App() {
             navigateTo={navigateTo} 
             isAdmin={isAdmin} 
             dataBeranda={dataBeranda} 
-            updateBeranda={updateBeranda} 
+            setDataBeranda={updateBeranda} 
             daftarAgenda={daftarAgenda}
+            setDaftarAgenda={updateAgenda}
             dataGrafik={dataGrafik}
             showConfirm={showConfirm}
             showAlert={showAlert}
-            db={db}
-            appId={appId}
           />
         )}
         {currentPage === 'profil' && (
           <HalamanProfilDesa 
             isAdmin={isAdmin}
             daftarProfil={daftarProfil}
+            setDaftarProfil={updateProfil}
             initialTabId={activeProfilTab}
             navigateTo={navigateTo}
             showConfirm={showConfirm}
-            db={db}
-            appId={appId}
           />
         )}
         {currentPage === 'pemerintah' && (
@@ -1014,10 +999,10 @@ export default function App() {
             isAdmin={isAdmin}
             activeTab={activePemerintahTab}
             daftarPerangkat={daftarPerangkat}
+            setDaftarPerangkat={updatePerangkat}
             daftarLembaga={daftarLembaga}
+            setDaftarLembaga={updateLembaga}
             showConfirm={showConfirm}
-            db={db}
-            appId={appId}
           />
         )}
         {currentPage === 'berita' && (
@@ -1025,12 +1010,10 @@ export default function App() {
             isAdmin={isAdmin}
             activeTab={activeBeritaTab}
             daftarBerita={daftarBerita} 
+            setDaftarBerita={updateBerita}
             dataGrafik={dataGrafik}
-            updateGrafik={updateGrafik}
+            setGrafik={updateGrafik}
             showConfirm={showConfirm}
-            showAlert={showAlert}
-            db={db}
-            appId={appId}
           />
         )}
         {currentPage === 'kontak' && <HalamanKontak />}
@@ -1169,10 +1152,9 @@ export default function App() {
 
 /* ================= Komponen Halaman ================= */
 
-function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, daftarAgenda, dataGrafik, showConfirm, showAlert, db, appId }: any) {
+function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daftarAgenda, setDaftarAgenda, dataGrafik, showConfirm, showAlert }: any) {
   const [showEditor, setShowEditor] = useState(false);
   const [editForm, setEditForm] = useState(dataBeranda);
-  const [isSaving, setIsSaving] = useState(false);
   
   const [showEditorAgenda, setShowEditorAgenda] = useState(false);
   const [editDataAgenda, setEditDataAgenda] = useState<any>({ id: null, judul: '', lokasi: '', tanggal: '' });
@@ -1224,28 +1206,11 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
     }));
   };
 
-  const handleSave = async (e: any) => {
+  const handleSave = (e: any) => {
     e.preventDefault();
-    setIsSaving(true);
-    try {
-      // PERBAIKAN: Gunakan Promise.all agar 4 gambar diupload secara PARALEL (Bersamaan)
-      const [heroBg, logoHero, headerLogo, fotoKades] = await Promise.all([
-        uploadBase64ToStorage(editForm.heroBg, 'beranda'),
-        uploadBase64ToStorage(editForm.logoHero, 'beranda'),
-        uploadBase64ToStorage(editForm.headerLogo, 'beranda'),
-        uploadBase64ToStorage(editForm.fotoKades, 'beranda')
-      ]);
-
-      const finalData = { ...editForm, heroBg, logoHero, headerLogo, fotoKades };
-      
-      await updateBeranda(finalData);
-      setShowEditor(false);
-      showAlert("Perubahan selesai. Cek hasilnya!");
-    } catch (error: any) {
-      showAlert("Gagal menyimpan: " + error.message);
-    } finally {
-      setIsSaving(false);
-    }
+    setDataBeranda(editForm);
+    setShowEditor(false);
+    showAlert("Perubahan selesai. Cek hasilnya!");
   };
 
   // ----- Logika Editor Agenda -----
@@ -1258,28 +1223,19 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
     setShowEditorAgenda(true);
   };
 
-  const handleSaveAgenda = async (e: any) => {
+  const handleSaveAgenda = (e: any) => {
     e.preventDefault();
-    setIsSaving(true);
-    try {
-      if (editDataAgenda.id && typeof editDataAgenda.id === 'string') {
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_agenda_list', editDataAgenda.id), editDataAgenda);
-      } else {
-        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_agenda_list'), editDataAgenda);
-      }
-      setShowEditorAgenda(false);
-    } catch (err: any) {
-      showAlert("Gagal menyimpan agenda: " + err.message);
-    } finally {
-      setIsSaving(false);
+    if (editDataAgenda.id) {
+      setDaftarAgenda(daftarAgenda.map((a: any) => a.id === editDataAgenda.id ? editDataAgenda : a));
+    } else {
+      setDaftarAgenda([...daftarAgenda, { ...editDataAgenda, id: Date.now() }]);
     }
+    setShowEditorAgenda(false);
   };
 
   const handleDeleteAgenda = (id: any) => {
-    showConfirm('Yakin ingin menghapus agenda ini?', async () => {
-      if (typeof id === 'string') {
-        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_agenda_list', id));
-      }
+    showConfirm('Yakin ingin menghapus agenda ini?', () => {
+      setDaftarAgenda(daftarAgenda.filter((a: any) => a.id !== id));
     });
   };
 
@@ -1290,14 +1246,33 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
   const currentDay = today.getDate();
   const [infoTanggal, setInfoTanggal] = useState<{tanggal: string, keterangan: string} | null>(null);
 
-  const handlePrevYear = () => { setCurrentYear(currentYear - 1); setInfoTanggal(null); };
-  const handleNextYear = () => { setCurrentYear(currentYear + 1); setInfoTanggal(null); };
-  const handlePrevMonth = () => {
-    if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); } else { setCurrentMonth(currentMonth - 1); }
+  const handlePrevYear = () => {
+    setCurrentYear(currentYear - 1);
     setInfoTanggal(null);
   };
+
+  const handleNextYear = () => {
+    setCurrentYear(currentYear + 1);
+    setInfoTanggal(null);
+  };
+
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+    setInfoTanggal(null);
+  };
+
   const handleNextMonth = () => {
-    if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); } else { setCurrentMonth(currentMonth + 1); }
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
     setInfoTanggal(null);
   };
 
@@ -1308,10 +1283,14 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
   const dayNames = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
   const calendarDays = [];
-  for (let i = 0; i < firstDayOfMonth; i++) { calendarDays.push(null); }
-  for (let i = 1; i <= daysInMonth; i++) { calendarDays.push(i); }
+  for (let i = 0; i < firstDayOfMonth; i++) {
+    calendarDays.push(null);
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    calendarDays.push(i);
+  }
 
-  // Filter agenda untuk bulan ini
+  // Filter agenda untuk bulan ini (disortir berdasarkan tanggal)
   const agendaBulanIni = daftarAgenda.filter((a: any) => {
     if (!a.tanggal) return false;
     const d = new Date(a.tanggal);
@@ -1321,12 +1300,15 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
   // Fungsi Deteksi Hari Libur Nasional & Keagamaan
   const getHolidays = (d: number, m: number, y: number) => {
     const holidays = [];
+    
+    // Libur Statis (Tanggal Pasti Setiap Tahun)
     if (d === 1 && m === 0) holidays.push("Tahun Baru Masehi");
     if (d === 1 && m === 4) holidays.push("Hari Buruh Internasional");
     if (d === 1 && m === 5) holidays.push("Hari Lahir Pancasila");
     if (d === 17 && m === 7) holidays.push("Hari Kemerdekaan RI");
     if (d === 25 && m === 11) holidays.push("Hari Raya Natal");
     
+    // Prediksi/Jadwal Libur Dinamis Keagamaan (Contoh hardcode untuk 2024 - 2026)
     if (y === 2024) {
       if (d === 8 && m === 1) holidays.push("Isra Mikraj Nabi Muhammad SAW");
       if (d === 10 && m === 1) holidays.push("Tahun Baru Imlek");
@@ -1362,6 +1344,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
       if (d === 16 && m === 5) holidays.push("Tahun Baru Islam");
       if (d === 25 && m === 7) holidays.push("Maulid Nabi Muhammad SAW");
     }
+
     return holidays;
   };
 
@@ -1485,6 +1468,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 text-center">
             {dataBeranda.stats.map((stat: any) => {
+              // --- SINKRONISASI DATA GRAFIK KE TOTAL PENDUDUK ---
               let displayNum = stat.num;
               let displayLaki = stat.subLaki;
               let displayPerempuan = stat.subPerempuan;
@@ -1559,6 +1543,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
                 {calendarDays.map((day, idx) => {
                   const isToday = day === currentDay && currentMonth === today.getMonth() && currentYear === today.getFullYear();
                   
+                  // Deteksi Agenda
                   const agendaHariIni = daftarAgenda.filter((a: any) => {
                     if(!a.tanggal) return false;
                     const d = new Date(a.tanggal);
@@ -1566,6 +1551,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
                   });
                   const hasAgenda = agendaHariIni.length > 0;
                   
+                  // Deteksi Hari Minggu & Libur Nasional
                   const isSunday = (idx % 7) === 0;
                   const liburan = day ? getHolidays(day, currentMonth, currentYear) : [];
                   const isHoliday = liburan.length > 0;
@@ -1617,6 +1603,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
                 })}
               </div>
 
+              {/* Kotak Info Tanggal (Muncul Jika Tanggal Diklik) */}
               {infoTanggal && (
                 <div className="mt-6 p-4 bg-indigo-50 border border-indigo-100 rounded-xl flex items-start animate-in fade-in slide-in-from-bottom-2">
                   <Info className="w-5 h-5 text-indigo-600 mr-3 flex-shrink-0 mt-0.5" />
@@ -1695,11 +1682,9 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
                 </div>
                 Pengaturan Konten Beranda
               </h3>
-              {!isSaving && (
-                <button type="button" onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+              <button type="button" onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             
             <form onSubmit={handleSave} className="space-y-8">
@@ -1722,7 +1707,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
                       <div className="flex-1">
                         <label className="cursor-pointer bg-white text-indigo-700 border-2 border-indigo-200 hover:bg-indigo-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
                           <Upload className="w-5 h-5 mr-2" /> Ganti Gambar Latar
-                          <input type="file" accept="image/*" className="hidden" onChange={(e) => handleHeroBgChange(e)} />
+                          <input type="file" accept="image/*" className="hidden" onChange={handleHeroBgChange} />
                         </label>
                         <p className="text-sm text-gray-500 mt-2 font-medium">Gambar pemandangan untuk latar atas. Otomatis dikompres.</p>
                       </div>
@@ -1742,7 +1727,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
                       <div className="flex-1">
                         <label className="cursor-pointer bg-white text-indigo-700 border-2 border-indigo-200 hover:bg-indigo-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
                           <Upload className="w-5 h-5 mr-2" /> {editForm.headerLogo ? 'Ganti Logo Header' : 'Upload Logo Header'}
-                          <input type="file" accept="image/*" className="hidden" onChange={(e) => handleHeaderLogoChange(e)} />
+                          <input type="file" accept="image/*" className="hidden" onChange={handleHeaderLogoChange} />
                         </label>
                         <p className="text-sm text-gray-500 mt-2 font-medium">Logo untuk navigasi pojok kiri atas. Bebas atau biarkan default.</p>
                       </div>
@@ -1762,7 +1747,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
                       <div className="flex-1">
                         <label className="cursor-pointer bg-white text-indigo-700 border-2 border-indigo-200 hover:bg-indigo-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
                           <Upload className="w-5 h-5 mr-2" /> {editForm.logoHero ? 'Ganti Logo Hero' : 'Upload Logo Hero'}
-                          <input type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoHeroChange(e)} />
+                          <input type="file" accept="image/*" className="hidden" onChange={handleLogoHeroChange} />
                         </label>
                         <p className="text-sm text-gray-500 mt-2 font-medium">Bisa menggunakan file berformat PNG transparan.</p>
                       </div>
@@ -1819,7 +1804,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
                       <div className="flex-1">
                         <label className="cursor-pointer bg-white text-indigo-700 border-2 border-indigo-200 hover:bg-indigo-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
                           <Upload className="w-5 h-5 mr-2" /> Ganti Foto
-                          <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFotoKadesUpload(e)} />
+                          <input type="file" accept="image/*" className="hidden" onChange={handleFotoKadesUpload} />
                         </label>
                       </div>
                     </div>
@@ -1843,6 +1828,8 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {editForm.stats.map((stat: any, index: number) => {
                     const isPopulasi = stat.id === 1;
+                    
+                    // Logic Sinkronisasi Display Input Editor
                     let displayNum = stat.num;
                     let displayLaki = stat.subLaki || '';
                     let displayPerempuan = stat.subPerempuan || '';
@@ -1880,11 +1867,21 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
                         <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100 mt-1">
                           <div>
                             <label className="block text-xs font-bold text-gray-700 mb-1">Laki-laki</label>
-                            <input type="text" value={displayLaki} disabled className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
+                            <input 
+                              type="text" 
+                              value={displayLaki}
+                              disabled
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" 
+                            />
                           </div>
                           <div>
                             <label className="block text-xs font-bold text-gray-700 mb-1">Perempuan</label>
-                            <input type="text" value={displayPerempuan} disabled className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" />
+                            <input 
+                              type="text" 
+                              value={displayPerempuan}
+                              disabled
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed" 
+                            />
                           </div>
                           <div className="col-span-2 text-[11px] text-amber-600 font-bold mt-1 leading-tight">
                             *Angka total penduduk otomatis tersinkronisasi dengan data pada menu Grafik Penduduk.
@@ -1897,12 +1894,11 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
               </div>
               
               <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
-                <button type="button" onClick={() => setShowEditor(false)} disabled={isSaving} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
+                <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" disabled={isSaving} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
-                  {isSaving ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />} 
-                  {isSaving ? 'Menyimpan ke Database...' : 'Simpan Perubahan'}
+                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
+                  <Save className="w-5 h-5 mr-2" /> Simpan Perubahan Beranda
                 </button>
               </div>
             </form>
@@ -1919,11 +1915,9 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
                 <CalendarDays className="w-6 h-6 mr-2 text-indigo-600" /> 
                 {editDataAgenda.id ? 'Edit Agenda' : 'Tambah Agenda Baru'}
               </h3>
-              {!isSaving && (
-                <button onClick={() => setShowEditorAgenda(false)} className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition">
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+              <button onClick={() => setShowEditorAgenda(false)} className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             
             <form onSubmit={handleSaveAgenda} className="space-y-5">
@@ -1956,10 +1950,9 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
               </div>
               
               <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={() => setShowEditorAgenda(false)} disabled={isSaving} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition">Batal</button>
-                <button type="submit" disabled={isSaving} className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 flex items-center">
-                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />} 
-                  {isSaving ? 'Menyimpan...' : 'Simpan Agenda'}
+                <button type="button" onClick={() => setShowEditorAgenda(false)} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition">Batal</button>
+                <button type="submit" className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg transition-all hover:-translate-y-0.5 flex items-center">
+                  <Save className="w-4 h-4 mr-2" /> Simpan Agenda
                 </button>
               </div>
             </form>
@@ -1971,25 +1964,26 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, updateBeranda, dafta
 }
 
 // ============== KOMPONEN PROFIL DESA ==============
-function HalamanProfilDesa({ isAdmin, daftarProfil, initialTabId, navigateTo, showConfirm, db, appId }: any) {
+function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabId, navigateTo, showConfirm }: any) {
   const [activeTabId, setActiveTabId] = useState<any>(initialTabId || daftarProfil[0]?.id);
   const [showEditor, setShowEditor] = useState(false);
   const [editData, setEditData] = useState<any>(null);
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (initialTabId) {
       setActiveTabId(initialTabId);
+    // Menggunakan perbandingan String() untuk mengatasi konflik tipe data Number vs String dari localStorage
     } else if (daftarProfil.length > 0 && !daftarProfil.find((p: any) => String(p.id) === String(activeTabId))) {
       setActiveTabId(daftarProfil[0].id);
     }
   }, [initialTabId, daftarProfil, activeTabId]);
 
+  // Menggunakan perbandingan String() agar selalu cocok
   const activeProfil = daftarProfil.find((p: any) => String(p.id) === String(activeTabId));
 
   const handleDelete = (id: any) => {
-    showConfirm('Yakin ingin menghapus bagian profil ini?', async () => {
-      if(typeof id === 'string') await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_profil_list', id));
+    showConfirm('Yakin ingin menghapus bagian profil ini?', () => {
+      setDaftarProfil(daftarProfil.filter((p: any) => p.id !== id));
     });
   };
 
@@ -2002,31 +1996,22 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, initialTabId, navigateTo, sh
     setShowEditor(true);
   };
 
-  const handleSave = async (e: any) => {
+  const handleSave = (e: any) => {
     e.preventDefault();
-    setIsSaving(true);
-    try {
-      let gambar = await uploadBase64ToStorage(editData.gambar, 'profil');
-      const finalData = { ...editData, gambar };
-
-      if (finalData.id && typeof finalData.id === 'string') {
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_profil_list', finalData.id), finalData);
-      } else {
-        const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_profil_list'), finalData);
-        setActiveTabId(docRef.id);
-      }
-      setShowEditor(false);
-    } catch(err) {
-      console.error(err);
-    } finally {
-      setIsSaving(false);
+    if (editData.id) {
+      setDaftarProfil(daftarProfil.map((p: any) => p.id === editData.id ? editData : p));
+    } else {
+      const newProfil = { ...editData, id: Date.now() };
+      setDaftarProfil([...daftarProfil, newProfil]);
+      setActiveTabId(newProfil.id); 
     }
+    setShowEditor(false);
   };
 
   const handleImageUpload = (e: any) => {
     const file = e.target.files[0];
     if (file) {
-      compressImage(file, 800, false, (base64: any) => { // PERBAIKAN: Max-width diturunkan ke 800
+      compressImage(file, 1200, false, (base64: any) => {
         setEditData({ ...editData, gambar: base64 });
       });
       e.target.value = '';
@@ -2206,11 +2191,9 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, initialTabId, navigateTo, sh
                 </div>
                 {editData.id ? 'Edit Bagian Profil' : 'Tambah Bagian Profil Baru'}
               </h3>
-              {!isSaving && (
-                <button type="button" onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+              <button type="button" onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             
             <form onSubmit={handleSave} className="space-y-6">
@@ -2280,12 +2263,11 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, initialTabId, navigateTo, sh
               </div>
               
               <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
-                <button type="button" onClick={() => setShowEditor(false)} disabled={isSaving} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
+                <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" disabled={isSaving} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
-                  {isSaving ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />} 
-                  {isSaving ? 'Menyimpan...' : 'Simpan Profil'}
+                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
+                  <Save className="w-5 h-5 mr-2" /> Simpan Profil
                 </button>
               </div>
             </form>
@@ -2297,16 +2279,14 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, initialTabId, navigateTo, sh
 }
 
 // ============== HALAMAN PEMERINTAHAN (STRUKTUR SOTK PERSIS GAMBAR) ==============
-function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembaga, showConfirm, db, appId }: any) {
+function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPerangkat, daftarLembaga, setDaftarLembaga, showConfirm }: any) {
   const isPerangkat = activeTab === 'perangkat' || !activeTab;
   
   const [showEditorPerangkat, setShowEditorPerangkat] = useState(false);
   const [editDataPerangkat, setEditDataPerangkat] = useState<any>(null);
-  const [isSavingPerangkat, setIsSavingPerangkat] = useState(false);
 
   const [showEditorLembaga, setShowEditorLembaga] = useState(false);
   const [editDataLembaga, setEditDataLembaga] = useState<any>(null);
-  const [isSavingLembaga, setIsSavingLembaga] = useState(false);
 
   const getTabTitle = (tabId: string) => {
     switch(tabId) {
@@ -2329,8 +2309,8 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
   };
 
   const handleDeletePerangkat = (id: any) => {
-    showConfirm('Yakin ingin menghapus perangkat desa ini?', async () => {
-      if(typeof id === 'string') await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_perangkat_list', id));
+    showConfirm('Yakin ingin menghapus perangkat desa ini?', () => {
+      setDaftarPerangkat(daftarPerangkat.filter((p: any) => p.id !== id));
     });
   };
   const openEditorPerangkat = (perangkat: any = null) => {
@@ -2338,19 +2318,14 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
     else setEditDataPerangkat({ id: null, nama: '', jabatan: '', foto: '' });
     setShowEditorPerangkat(true);
   };
-  const handleSavePerangkat = async (e: any) => {
+  const handleSavePerangkat = (e: any) => {
     e.preventDefault();
-    setIsSavingPerangkat(true);
-    try {
-      let foto = await uploadBase64ToStorage(editDataPerangkat.foto, 'perangkat');
-      const finalData = { ...editDataPerangkat, foto };
-      if (finalData.id && typeof finalData.id === 'string') {
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_perangkat_list', finalData.id), finalData);
-      } else {
-        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_perangkat_list'), finalData);
-      }
-      setShowEditorPerangkat(false);
-    } catch(err) { console.error(err); } finally { setIsSavingPerangkat(false); }
+    if (editDataPerangkat.id) {
+      setDaftarPerangkat(daftarPerangkat.map((p: any) => p.id === editDataPerangkat.id ? editDataPerangkat : p));
+    } else {
+      setDaftarPerangkat([...daftarPerangkat, { ...editDataPerangkat, id: Date.now() }]);
+    }
+    setShowEditorPerangkat(false);
   };
   const handleImageUploadPerangkat = (e: any) => {
     const file = e.target.files[0];
@@ -2365,8 +2340,8 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
   const filteredLembaga = daftarLembaga.filter((l: any) => l.kategori === activeTab);
   
   const handleDeleteLembaga = (id: any) => {
-    showConfirm('Yakin ingin menghapus data ini?', async () => {
-      if(typeof id === 'string') await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_lembaga_list', id));
+    showConfirm('Yakin ingin menghapus data ini?', () => {
+      setDaftarLembaga(daftarLembaga.filter((l: any) => l.id !== id));
     });
   };
   const openEditorLembaga = (lembaga: any = null) => {
@@ -2374,19 +2349,14 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
     else setEditDataLembaga({ id: null, kategori: activeTab, nama: '', jabatan: '', jenisKelamin: 'Laki-laki', umur: '', foto: '' });
     setShowEditorLembaga(true);
   };
-  const handleSaveLembaga = async (e: any) => {
+  const handleSaveLembaga = (e: any) => {
     e.preventDefault();
-    setIsSavingLembaga(true);
-    try {
-      let foto = await uploadBase64ToStorage(editDataLembaga.foto, 'lembaga');
-      const finalData = { ...editDataLembaga, foto };
-      if (finalData.id && typeof finalData.id === 'string') {
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_lembaga_list', finalData.id), finalData);
-      } else {
-        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_lembaga_list'), finalData);
-      }
-      setShowEditorLembaga(false);
-    } catch(err) { console.error(err); } finally { setIsSavingLembaga(false); }
+    if (editDataLembaga.id) {
+      setDaftarLembaga(daftarLembaga.map((l: any) => l.id === editDataLembaga.id ? editDataLembaga : l));
+    } else {
+      setDaftarLembaga([...daftarLembaga, { ...editDataLembaga, id: Date.now() }]);
+    }
+    setShowEditorLembaga(false);
   };
   const handleImageUploadLembaga = (e: any) => {
     const file = e.target.files[0];
@@ -2406,11 +2376,16 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
   const kasunList = daftarPerangkat.filter((p: any) => p.jabatan.toUpperCase().includes('KASUN') || p.jabatan.toUpperCase().includes('DUSUN'));
 
   // Logika Tinggi Dinamis Container Berdasarkan Jumlah Kasun
-  const maxKasunPerRow = 6; 
+  const maxKasunPerRow = 6; // Maksimal 6 Kasun per baris sesuai instruksi
   const kasunRowCount = Math.ceil(kasunList.length / maxKasunPerRow);
+  
+  // Jika 0 Kasun, batang putus di garis Kaur (Y=620)
   const trunkHeight = kasunRowCount === 0 ? 360 : 680 + ((kasunRowCount - 1) * 340);
+  
+  // Tinggi Container Dinamis
   const containerHeight = kasunRowCount === 0 ? 950 : 1300 + ((kasunRowCount - 1) * 340);
 
+  // Desain Card Perangkat Persis Screenshot
   const PerangkatCard = ({ p }: any) => (
     <div style={{ width: '160px', height: '260px' }} className="bg-white border-[3px] border-black overflow-hidden relative flex flex-col items-center shadow-lg group z-10">
        {isAdmin && (
@@ -2474,36 +2449,57 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
                <div className="col-span-full text-center text-gray-500 py-20 bg-white rounded-3xl border border-dashed border-gray-300 font-medium text-lg max-w-6xl mx-auto">Belum ada data perangkat desa.</div>
             ) : (
               <div className="w-full overflow-x-auto pb-10 custom-scrollbar">
+                {/* Wadah Absolut untuk struktur berjenjang yang presisi */}
                 <div style={{ width: '1300px', height: `${containerHeight}px`, position: 'relative', margin: '0 auto', marginTop: '40px' }} className="bg-white/50 rounded-3xl">
 
                   {/* --- GARIS PENGHUBUNG (CONNECTOR LINES) --- */}
+                  
+                  {/* Garis BPD ke Kades */}
                   <div style={{ position: 'absolute', left: '330px', top: '120px', width: '240px', borderTop: '4px dashed black', zIndex: 0 }}></div>
+                  
+                  {/* Batang Utama (Trunk) vertikal dari Kades turun ke Kasun */}
                   <div style={{ position: 'absolute', left: '648px', top: '260px', width: '4px', height: `${trunkHeight}px`, backgroundColor: 'black', zIndex: 0 }}></div>
+
+                  {/* Cabang Sekdes (Kanan) */}
                   <div style={{ position: 'absolute', left: '648px', top: '300px', width: '304px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '948px', top: '300px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  
+                  {/* Sambungan bawah Sekdes menuju Kaur */}
                   <div style={{ position: 'absolute', left: '948px', top: '580px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
+
+                  {/* Garis Horizontal Kaur */}
                   <div style={{ position: 'absolute', left: '748px', top: '620px', width: '404px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  {/* Drop Kaur 1, 2, 3 */}
                   <div style={{ position: 'absolute', left: '748px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '948px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '1148px', top: '620px', width: '4px', height: '20px', backgroundColor: 'black', zIndex: 0 }}></div>
+
+                  {/* Cabang Kasi (Kiri) */}
                   <div style={{ position: 'absolute', left: '148px', top: '420px', width: '504px', height: '4px', backgroundColor: 'black', zIndex: 0 }}></div>
+                  {/* Drop Kasi 1, 2, 3 */}
                   <div style={{ position: 'absolute', left: '148px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '348px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
                   <div style={{ position: 'absolute', left: '548px', top: '420px', width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0 }}></div>
 
+
                   {/* --- KARTU PERANGKAT DESA (NODES) --- */}
+                  
+                  {/* Kotak BPD (Statis) */}
                   <div style={{ position: 'absolute', left: '170px', top: '80px', width: '160px', height: '80px', zIndex: 10 }} className="bg-white border-[3px] border-black flex items-center justify-center font-black text-2xl shadow-lg tracking-widest">
                     BPD
                   </div>
 
+                  {/* Level 1: Kepala Desa */}
                   <div style={{ position: 'absolute', left: '570px', top: '0px', zIndex: 10 }}>
                     {kadesList[0] && <PerangkatCard p={kadesList[0]} />}
                   </div>
 
+                  {/* Level 2: Sekretaris Desa */}
                   <div style={{ position: 'absolute', left: '870px', top: '320px', zIndex: 10 }}>
                     {sekdesList[0] && <PerangkatCard p={sekdesList[0]} />}
                   </div>
 
+                  {/* Level 3: Kasi (Kiri) */}
                   <div style={{ position: 'absolute', left: '70px', top: '460px', zIndex: 10 }}>
                     {kasiList[0] && <PerangkatCard p={kasiList[0]} />}
                   </div>
@@ -2514,6 +2510,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
                     {kasiList[2] && <PerangkatCard p={kasiList[2]} />}
                   </div>
 
+                  {/* Level 3: Kaur (Kanan) */}
                   <div style={{ position: 'absolute', left: '670px', top: '640px', zIndex: 10 }}>
                     {kaurList[0] && <PerangkatCard p={kaurList[0]} />}
                   </div>
@@ -2524,13 +2521,14 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
                     {kaurList[2] && <PerangkatCard p={kaurList[2]} />}
                   </div>
 
+
                   {/* --- RENDER DINAMIS KEPALA DUSUN --- */}
                   {(() => {
-                    const kasunGap = 200; 
-                    const baseLineY = 940; 
-                    const baseBoxY = 980; 
-                    const rowHeightSpacing = 340; 
-                    const centerX = 650; 
+                    const kasunGap = 200; // Jarak antar kotak kasun (dimodifikasi agar muat 6 kotak)
+                    const baseLineY = 940; // Y-koordinat garis horizontal kasun baris pertama
+                    const baseBoxY = 980; // Y-koordinat kotak kasun baris pertama
+                    const rowHeightSpacing = 340; // Jarak antar baris kasun baru
+                    const centerX = 650; // Titik tengah container
 
                     const rows = [];
                     for (let i = 0; i < kasunList.length; i += maxKasunPerRow) {
@@ -2541,10 +2539,13 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
                       const currentLineY = baseLineY + (rowIndex * rowHeightSpacing);
                       const currentBoxY = baseBoxY + (rowIndex * rowHeightSpacing);
                       const count = rowItems.length;
+                      
+                      // Menghitung offset untuk meletakkan kotak presisi di tengah
                       const startOffset = -((count - 1) / 2) * kasunGap;
 
                       return (
                         <React.Fragment key={`kasun-row-${rowIndex}`}>
+                          {/* Garis Horizontal Penghubung (Hanya muncul jika lebih dari 1 kasun di baris tersebut) */}
                           {count > 1 && (
                             <div style={{
                               position: 'absolute',
@@ -2557,17 +2558,28 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
                             }}></div>
                           )}
 
+                          {/* Garis Vertikal Drop & Kotak Kasun */}
                           {rowItems.map((kasun: any, idx: number) => {
                             const itemCenterX = centerX + startOffset + (idx * kasunGap);
                             return (
                               <React.Fragment key={`kasun-item-${kasun.id}`}>
+                                {/* Drop Vertikal */}
                                 <div style={{
-                                  position: 'absolute', left: `${itemCenterX - 2}px`, top: `${currentLineY}px`,
-                                  width: '4px', height: '40px', backgroundColor: 'black', zIndex: 0
+                                  position: 'absolute',
+                                  left: `${itemCenterX - 2}px`,
+                                  top: `${currentLineY}px`,
+                                  width: '4px',
+                                  height: '40px',
+                                  backgroundColor: 'black',
+                                  zIndex: 0
                                 }}></div>
                                 
+                                {/* Kotak Card Perangkat */}
                                 <div style={{
-                                  position: 'absolute', left: `${itemCenterX - 80}px`, top: `${currentBoxY}px`, zIndex: 10
+                                  position: 'absolute',
+                                  left: `${itemCenterX - 80}px`,
+                                  top: `${currentBoxY}px`,
+                                  zIndex: 10
                                 }}>
                                   <PerangkatCard p={kasun} />
                                 </div>
@@ -2670,11 +2682,9 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
                 </div>
                 {editDataPerangkat.id ? 'Edit Perangkat' : 'Tambah Perangkat Baru'}
               </h3>
-              {!isSavingPerangkat && (
-                <button type="button" onClick={() => setShowEditorPerangkat(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+              <button type="button" onClick={() => setShowEditorPerangkat(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             
             <form onSubmit={handleSavePerangkat} className="space-y-6">
@@ -2723,12 +2733,11 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
               </div>
               
               <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
-                <button type="button" onClick={() => setShowEditorPerangkat(false)} disabled={isSavingPerangkat} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
+                <button type="button" onClick={() => setShowEditorPerangkat(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" disabled={isSavingPerangkat} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
-                  {isSavingPerangkat ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />} 
-                  {isSavingPerangkat ? 'Menyimpan...' : 'Simpan Data'}
+                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
+                  <Save className="w-5 h-5 mr-2" /> Simpan Data
                 </button>
               </div>
             </form>
@@ -2746,11 +2755,9 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
                 </div>
                 {editDataLembaga.id ? 'Edit Data' : 'Tambah Data Baru'}
               </h3>
-              {!isSavingLembaga && (
-                <button type="button" onClick={() => setShowEditorLembaga(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+              <button type="button" onClick={() => setShowEditorLembaga(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             
             <form onSubmit={handleSaveLembaga} className="space-y-6">
@@ -2823,12 +2830,11 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
               </div>
               
               <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
-                <button type="button" onClick={() => setShowEditorLembaga(false)} disabled={isSavingLembaga} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
+                <button type="button" onClick={() => setShowEditorLembaga(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" disabled={isSavingLembaga} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
-                  {isSavingLembaga ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />} 
-                  {isSavingLembaga ? 'Menyimpan...' : 'Simpan Data'}
+                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
+                  <Save className="w-5 h-5 mr-2" /> Simpan Data
                 </button>
               </div>
             </form>
@@ -2839,10 +2845,9 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, daftarLembag
   );
 }
 
-function HalamanBerita({ isAdmin, activeTab, daftarBerita, dataGrafik, updateGrafik, showConfirm, showAlert, db, appId }: any) {
+function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, dataGrafik, setGrafik, showConfirm }: any) {
   const [showEditorBerita, setShowEditorBerita] = useState(false);
   const [editDataBerita, setEditDataBerita] = useState<any>(null);
-  const [isSaving, setIsSaving] = useState(false);
   const [selectedBerita, setSelectedBerita] = useState<any>(null);
 
   const [showEditorGrafik, setShowEditorGrafik] = useState(false);
@@ -2851,13 +2856,14 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, dataGrafik, updateGra
   const isListBerita = activeTab === 'list-berita' || !activeTab;
 
   const handleDelete = (id: any) => {
-    showConfirm('Yakin ingin menghapus berita ini?', async () => {
-      if(typeof id === 'string') await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_berita_list', id));
+    showConfirm('Yakin ingin menghapus berita ini?', () => {
+      setDaftarBerita(daftarBerita.filter((b: any) => b.id !== id));
     });
   };
 
   const openEditorBerita = (berita: any = null) => {
     if (berita) {
+      // Pastikan ada property galeri walau dari data lama
       setEditDataBerita({ ...berita, galeri: berita.galeri || [] });
     } else {
       setEditDataBerita({ id: null, judul: '', tanggal: '', kategori: '', excerpt: '', gambar: '', galeri: [] });
@@ -2865,49 +2871,28 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, dataGrafik, updateGra
     setShowEditorBerita(true);
   };
 
-  const handleSaveBerita = async (e: any) => {
+  const handleSaveBerita = (e: any) => {
     e.preventDefault();
-    setIsSaving(true);
-    try {
-      // PERBAIKAN: Upload gambar utama & galeri tambahan secara PARALEL agar jauh lebih cepat
-      const [gambar, galeri] = await Promise.all([
-        uploadBase64ToStorage(editDataBerita.gambar, 'berita'),
-        Promise.all((editDataBerita.galeri || []).map(async (g: any) => ({
-           ...g, url: await uploadBase64ToStorage(g.url, 'galeri_berita')
-        })))
-      ]);
-
-      const finalData = { ...editDataBerita, gambar, galeri };
-
-      if (finalData.id && typeof finalData.id === 'string') {
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_berita_list', finalData.id), finalData);
-      } else {
-        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_berita_list'), finalData);
+    if (editDataBerita.id) {
+      setDaftarBerita(daftarBerita.map((b: any) => b.id === editDataBerita.id ? editDataBerita : b));
+      if (selectedBerita && selectedBerita.id === editDataBerita.id) {
+        setSelectedBerita(editDataBerita);
       }
-      setShowEditorBerita(false);
-    } catch(err: any) {
-      showAlert("Error: " + err.message);
-    } finally {
-      setIsSaving(false);
+    } else {
+      const newBerita = { ...editDataBerita, id: Date.now() };
+      setDaftarBerita([newBerita, ...daftarBerita]);
     }
+    setShowEditorBerita(false);
   };
 
-  const handleSaveGrafik = async (e: any) => {
+  const handleSaveGrafik = (e: any) => {
     e.preventDefault();
-    setIsSaving(true);
-    try {
-      const finalGrafik = {
-        ...editDataGrafik,
-        lakiLaki: parseInt(editDataGrafik.lakiLaki) || 0,
-        perempuan: parseInt(editDataGrafik.perempuan) || 0
-      };
-      await updateGrafik(finalGrafik);
-      setShowEditorGrafik(false);
-    } catch (e: any) {
-      showAlert("Gagal: " + e.message);
-    } finally {
-      setIsSaving(false);
-    }
+    setGrafik({
+      ...editDataGrafik,
+      lakiLaki: parseInt(editDataGrafik.lakiLaki) || 0,
+      perempuan: parseInt(editDataGrafik.perempuan) || 0
+    });
+    setShowEditorGrafik(false);
   };
 
   const handleImageUpload = (e: any) => {
@@ -3029,7 +3014,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, dataGrafik, updateGra
 
                             {/* Text Berita + Sisipan Tengah */}
                             {paragraphs.map((p: string, idx: number) => {
-                              // Tentukan dimana gambar 'tengah' akan muncul
+                              // Tentukan dimana gambar 'tengah' akan muncul. Jika paragraf sedikit, muncul di awal/akhir
                               const isMiddle = paragraphs.length > 1 ? idx === Math.floor(paragraphs.length / 2) : idx === 0;
 
                               return (
@@ -3261,11 +3246,9 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, dataGrafik, updateGra
                 </div>
                 {editDataBerita.id ? 'Edit Berita' : 'Tambah Berita Baru'}
               </h3>
-              {!isSaving && (
-                <button type="button" onClick={() => setShowEditorBerita(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+              <button type="button" onClick={() => setShowEditorBerita(false)} className="text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             
             <form onSubmit={handleSaveBerita} className="space-y-6">
@@ -3379,12 +3362,11 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, dataGrafik, updateGra
               </div>
               
               <div className="flex justify-end gap-4 pt-6 sticky bottom-0 bg-white p-4 -mx-8 -mb-8 rounded-b-3xl">
-                <button type="button" onClick={() => setShowEditorBerita(false)} disabled={isSaving} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
+                <button type="button" onClick={() => setShowEditorBerita(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" disabled={isSaving} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
-                  {isSaving ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />} 
-                  {isSaving ? 'Menyimpan & Upload...' : 'Simpan Berita'}
+                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
+                  <Save className="w-5 h-5 mr-2" /> Simpan Berita
                 </button>
               </div>
             </form>
@@ -3400,11 +3382,9 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, dataGrafik, updateGra
               <h3 className="text-xl font-extrabold text-gray-900 flex items-center tracking-tight">
                 <PieChart className="w-6 h-6 mr-2 text-indigo-600" /> Update Grafik
               </h3>
-              {!isSaving && (
-                <button onClick={() => setShowEditorGrafik(false)} className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition">
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+              <button onClick={() => setShowEditorGrafik(false)} className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             
             <form onSubmit={handleSaveGrafik} className="space-y-5">
@@ -3447,16 +3427,107 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, dataGrafik, updateGra
                  </div>
               </div>
               <button 
-                type="submit" disabled={isSaving}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg mt-4 transition-all hover:-translate-y-0.5 flex items-center justify-center"
+                type="submit" 
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg mt-4 transition-all hover:-translate-y-0.5"
               >
-                {isSaving ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : ''}
-                {isSaving ? 'Menyimpan...' : 'Simpan Grafik'}
+                Simpan Grafik
               </button>
             </form>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function HalamanKontak() {
+  return (
+    <div className="animate-in fade-in zoom-in-95 duration-500 py-16 bg-gray-50 min-h-[70vh]">
+      <div className="container mx-auto px-4 lg:px-8">
+        <div className="text-center mb-16">
+          <span className="text-indigo-600 font-bold tracking-widest uppercase text-sm mb-2 block">Layanan Pengaduan</span>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Hubungi Kami</h2>
+          <div className="w-24 h-1.5 bg-gradient-to-r from-indigo-600 to-indigo-400 mx-auto rounded-full"></div>
+          <p className="mt-6 text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
+            Punya pertanyaan, masukan, atau perlu layanan dari Pemerintah Desa? Silakan kunjungi atau hubungi kami.
+          </p>
+        </div>
+
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+          <div className="bg-white p-10 md:p-12 rounded-3xl shadow-xl border border-gray-100 h-full flex flex-col justify-between relative overflow-hidden">
+             <div className="absolute bottom-0 right-0 w-40 h-40 bg-indigo-50 rounded-tl-full -z-10"></div>
+
+            <div>
+              <h3 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">Informasi Kontak</h3>
+              <div className="space-y-8">
+                <div className="flex items-start group">
+                  <div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600 mr-5 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-sm border border-indigo-100 group-hover:border-indigo-600">
+                    <MapPin className="w-7 h-7" />
+                  </div>
+                  <div className="pt-1">
+                    <h4 className="font-extrabold text-gray-900 text-xl">Alamat Kantor Desa</h4>
+                    <p className="text-gray-600 leading-relaxed mt-2 text-lg">
+                      Jl. Sunan Kalijaga Dusun II, Rt. 01 Rw. 01<br/>
+                      Kecamatan Makarti Jaya, Kabupaten Banyuasin<br/>
+                      Provinsi Sumatera Selatan, 30972
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start group">
+                  <div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600 mr-5 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-sm border border-indigo-100 group-hover:border-indigo-600">
+                    <Phone className="w-7 h-7" />
+                  </div>
+                  <div className="pt-1">
+                    <h4 className="font-extrabold text-gray-900 text-xl">Telepon / WhatsApp</h4>
+                    <p className="text-gray-600 mt-2 text-lg font-medium">+62 852-7971-1678</p>
+                  </div>
+                </div>
+                <div className="flex items-start group">
+                  <div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600 mr-5 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-sm border border-indigo-100 group-hover:border-indigo-600">
+                    <Mail className="w-7 h-7" />
+                  </div>
+                  <div className="pt-1">
+                    <h4 className="font-extrabold text-gray-900 text-xl">Email</h4>
+                    <p className="text-gray-600 mt-2 text-lg font-medium">upangmulya@gmail.com</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-12 pt-8 border-t border-gray-100 bg-gray-50 -mx-10 -mb-10 p-10 md:p-12 rounded-b-3xl">
+              <h4 className="font-extrabold text-gray-900 mb-5 text-xl">Jam Pelayanan Masyarakat:</h4>
+              <ul className="text-gray-700 space-y-3 text-lg">
+                <li className="flex justify-between items-center bg-white p-3 px-4 rounded-xl shadow-sm border border-gray-100"><span className="font-bold">Senin - Kamis</span> <span className="text-indigo-700 font-bold bg-indigo-50 px-3 py-1 rounded-lg">08.00 - 15.00 WIB</span></li>
+                <li className="flex justify-between items-center bg-white p-3 px-4 rounded-xl shadow-sm border border-gray-100"><span className="font-bold">Jumat</span> <span className="text-indigo-700 font-bold bg-indigo-50 px-3 py-1 rounded-lg">08.00 - 11.30 WIB</span></li>
+                <li className="flex justify-between items-center bg-rose-50 p-3 px-4 rounded-xl shadow-sm border border-rose-100"><span className="font-bold text-rose-800">Sabtu - Minggu</span> <span className="text-rose-700 font-bold">Tutup</span></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Menambahkan tag tautan (a) untuk membuat peta dapat diklik */}
+          <div className="bg-white p-3 rounded-3xl shadow-xl h-full min-h-[500px] border border-gray-100">
+            <a 
+              href="https://maps.app.goo.gl/ZNSJokDqvJHrnMtP9" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="block w-full h-full bg-gray-100 rounded-2xl flex flex-col items-center justify-center text-gray-500 overflow-hidden relative group cursor-pointer"
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Peta" 
+                className="w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:opacity-80 transition-all duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center transition-transform duration-300 group-hover:-translate-y-2">
+                 <div className="bg-white p-4 rounded-full shadow-2xl mb-4 group-hover:shadow-[0_0_30px_rgba(67,56,202,0.6)] transition-all">
+                   <MapPin className="w-10 h-10 text-indigo-600" />
+                 </div>
+                 <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4">Lokasi Kantor <br/> Desa Upang Mulya</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
