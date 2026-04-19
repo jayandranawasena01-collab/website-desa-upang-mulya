@@ -3507,7 +3507,7 @@ function HalamanKontak() {
           {/* Menambahkan tag tautan (a) untuk membuat peta dapat diklik */}
           <div className="bg-white p-3 rounded-3xl shadow-xl h-full min-h-[500px] border border-gray-100">
             <a 
-              href="https://maps.app.goo.gl/YUxS68MLjqc1JLrR6" 
+              href="https://maps.app.goo.gl/ZNSJokDqvJHrnMtP9" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="block w-full h-full bg-gray-100 rounded-2xl flex flex-col items-center justify-center text-gray-500 overflow-hidden relative group cursor-pointer"
