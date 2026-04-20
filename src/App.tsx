@@ -22,17 +22,15 @@ let auth: any = null;
 let db: any = null;
 let appId = 'desa-upang-mulya';
 
-// ================= KONFIGURASI DATABASE MANUAL =================
-// Dibiarkan default untuk fallback jika tidak ada config otomatis, 
-// tapi sebaiknya parameter ini menyesuaikan project Firebase Anda.
-const firebaseConfigManual = {
-  apiKey: "AIzaSyBIl0_tSPDJux9rr2FIL_-ZLZFqLPQ4WCY",
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDDRuhPQdJvX69T-NtlMxaae-Tc6vnj8kM",
   authDomain: "web-desa-upang-mulya.firebaseapp.com",
   projectId: "web-desa-upang-mulya",
   storageBucket: "web-desa-upang-mulya.firebasestorage.app",
-  messagingSenderId: "673276122437",
-  appId: "1:673276122437:web:dc2de24a0209f40e6e5a2c",
-  measurementId: "G-JLGMKQXVV4"
+  messagingSenderId: "52513838186",
+  appId: "1:52513838186:web:a8cd15ddcfb4009f672613",
+  measurementId: "G-MC5D8EVHT7"
 };
 
 // Mencegah Firebase berjalan saat proses "Build" di server Vercel (SSR)
