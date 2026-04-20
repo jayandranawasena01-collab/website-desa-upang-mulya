@@ -4,7 +4,7 @@ import {
   MapPin, Mail, ChevronRight, Landmark, ArrowRight,
   LogIn, LogOut, Edit, Trash2, Plus, Image as ImageIcon, Save, Upload, CheckCircle2,
   BookOpen, Target, Map, Building2, ChevronDown, CalendarDays, PieChart, TrendingUp, Activity,
-  ChevronLeft, ChevronsLeft, ChevronsRight
+  ChevronLeft, ChevronsLeft, ChevronsRight, Volume2, VolumeX
 } from 'lucide-react';
 
 // ================= FIREBASE CLOUD STORAGE SETUP =================
@@ -23,6 +23,8 @@ let db: any = null;
 let appId = 'desa-upang-mulya';
 
 // ================= KONFIGURASI DATABASE MANUAL =================
+// Dibiarkan default untuk fallback jika tidak ada config otomatis, 
+// tapi sebaiknya parameter ini menyesuaikan project Firebase Anda.
 const firebaseConfigManual = {
   apiKey: "AIzaSyBIl0_tSPDJux9rr2FIL_-ZLZFqLPQ4WCY",
   authDomain: "web-desa-upang-mulya.firebaseapp.com",
@@ -260,6 +262,31 @@ export default function App() {
   const showAlert = (message: string) => setDialog({ isOpen: true, type: 'alert', message, onConfirm: null });
   const showConfirm = (message: string, onConfirm: any) => setDialog({ isOpen: true, type: 'confirm', message, onConfirm });
   
+  // Background Music State
+  const [musicEnabled, setMusicEnabled] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  // ================= MUSIK LATAR (AUTOPLAY PADA INTERAKSI PERTAMA) =================
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      if (!hasInteracted) {
+        setHasInteracted(true);
+        setMusicEnabled(true);
+      }
+    };
+
+    // Kebijakan browser modern memblokir autoplay. Kita beri tombol jika ini gagal di-trigger otomatis.
+    document.addEventListener('click', handleFirstInteraction, { once: true });
+    document.addEventListener('touchstart', handleFirstInteraction, { once: true });
+    document.addEventListener('keydown', handleFirstInteraction, { once: true });
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
+      document.removeEventListener('keydown', handleFirstInteraction);
+    };
+  }, [hasInteracted]);
+
   // ================= INIT STATE =================
   const getInitialData = (key: string, fallback: any) => {
     if (typeof window !== 'undefined') {
@@ -330,8 +357,6 @@ export default function App() {
 
   // ================= FETCH DATA =================
   useEffect(() => {
-    // PENTING: Tunggu hingga Firebase database DAN user auth token (anonymous/custom) tersedia.
-    // Jika tidak, permintaan baca data ini akan diblokir oleh aturan izin (permission denied).
     if (!db || !user) return; 
 
     const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
@@ -387,7 +412,7 @@ export default function App() {
     return () => {
       unsubBeranda(); unsubBerita(); unsubGrafik(); unsubAgenda(); unsubPerangkat(); unsubLembaga(); unsubProfil();
     };
-  }, [user]); // Dependensi user ditambahkan agar fungsi berjalan HANYA jika terautentikasi
+  }, [user]);
 
   // ================= UPDATE FUNCTIONS =================
   const updateBeranda = async (newData: any) => {
@@ -476,7 +501,6 @@ export default function App() {
 
     if (page === 'profil' && tabId !== null) {
       setActiveProfilTab(tabId);
-      // Diubah ke string untuk keamanan penyimpanan local storage
       if (typeof window !== 'undefined') localStorage.setItem('upang_mulya_activeProfilTab', String(tabId));
     }
     if (page === 'pemerintah' && tabId !== null) {
@@ -584,11 +608,11 @@ export default function App() {
             border-radius: 8px;
           }
           .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #d1d5db; 
+            background: #cbd5e1; 
             border-radius: 8px;
           }
           .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af; 
+            background: #94a3b8; 
           }
           @keyframes growBar {
             from { width: 0; }
@@ -599,8 +623,8 @@ export default function App() {
         `}
       </style>
 
-      {/* Header & Navbar */}
-      <header className="bg-gradient-to-r from-indigo-900 to-indigo-800 text-white sticky top-0 z-40 shadow-xl border-b border-indigo-700">
+      {/* Header & Navbar - Tema Profesional Indigo/Navy */}
+      <header className="bg-gradient-to-r from-slate-900 to-indigo-900 text-white sticky top-0 z-40 shadow-xl border-b border-indigo-700/50">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex justify-between items-center py-3">
             {/* Logo */}
@@ -608,7 +632,7 @@ export default function App() {
               className="flex items-center gap-4 cursor-pointer group"
               onClick={() => navigateTo('beranda')}
             >
-              <div className="bg-white/10 backdrop-blur-sm p-1.5 rounded-xl border border-white/20 group-hover:bg-white transition duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden">
+              <div className="bg-white/10 backdrop-blur-sm p-1.5 rounded-xl border border-white/20 group-hover:bg-white transition duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden shadow-lg">
                 {dataBeranda.headerLogo ? (
                   <img src={dataBeranda.headerLogo} alt="Logo" className="w-full h-full object-contain" />
                 ) : (
@@ -622,7 +646,7 @@ export default function App() {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10">
+            <nav className="hidden lg:flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner">
               <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
               
               {/* Dropdown Profil Desa */}
@@ -824,7 +848,7 @@ export default function App() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden bg-indigo-950/95 backdrop-blur-xl border-t border-white/10">
+          <div className="lg:hidden bg-slate-900/95 backdrop-blur-xl border-t border-white/10">
             <div className="flex flex-col px-4 pt-2 pb-4 space-y-2">
               <MobileNavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')}>Beranda</MobileNavButton>
               
@@ -944,7 +968,7 @@ export default function App() {
 
       {/* Pesan Alert Login Admin Aktif */}
       {isAdmin && (
-        <div className="bg-indigo-100 text-indigo-800 px-4 py-3 text-sm font-medium text-center shadow-inner flex flex-col items-center justify-center gap-2 z-30 relative">
+        <div className="bg-indigo-100 text-indigo-800 px-4 py-3 text-sm font-medium text-center shadow-inner flex flex-col items-center justify-center gap-2 z-30 relative border-b border-indigo-200">
            <div className="flex items-center gap-2">
              <CheckCircle2 className="w-5 h-5 text-indigo-600" /> 
              <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
@@ -956,7 +980,7 @@ export default function App() {
              </div>
            )}
            {isDbConnected && (
-             <div className="bg-indigo-200 text-indigo-800 border border-indigo-400 px-3 py-1 rounded-full text-xs font-bold">
+             <div className="bg-indigo-200 text-indigo-800 border border-indigo-400 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
                ✅ Status Database: ONLINE (Tersinkronisasi dengan Server).
              </div>
            )}
@@ -1019,8 +1043,8 @@ export default function App() {
         {currentPage === 'kontak' && <HalamanKontak />}
       </main>
 
-      {/* Footer Elegan */}
-      <footer className="bg-gradient-to-b from-gray-900 to-black text-white pt-16 pb-8 border-t-[6px] border-indigo-600">
+      {/* Footer Elegan Tema Profesional */}
+      <footer className="bg-gradient-to-b from-slate-900 to-slate-950 text-white pt-16 pb-8 border-t-[6px] border-indigo-600">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
             <div>
@@ -1060,7 +1084,7 @@ export default function App() {
                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-indigo-900/50 transition mr-4">
                     <Phone className="w-5 h-5 text-indigo-400" />
                   </div>
-                  <span>0852-7971-1678</span>
+                  <span>0822-6876-4585</span>
                 </li>
                 <li className="flex items-center group">
                   <div className="bg-white/5 p-2 rounded-lg group-hover:bg-indigo-900/50 transition mr-4">
@@ -1080,7 +1104,7 @@ export default function App() {
       {/* Floating WhatsApp Button */}
       {currentPage === 'kontak' && (
         <a
-          href="https://wa.me/6285279711678"
+          href="https://wa.me/6282268764585"
           target="_blank"
           rel="noopener noreferrer"
           className="fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-[#25D366] hover:bg-[#128C7E] text-white p-4 rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.5)] z-50 flex items-center justify-center transition-all duration-300 hover:scale-110 animate-in fade-in slide-in-from-bottom-10 group"
@@ -1088,7 +1112,7 @@ export default function App() {
           <svg viewBox="0 0 24 24" className="w-7 h-7 md:w-8 md:h-8 fill-current">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.88-.653-1.473-1.46-1.646-1.757-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
           </svg>
-          <span className="absolute right-full mr-4 bg-white text-gray-800 text-sm font-bold px-4 py-2 rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap hidden sm:block border border-gray-100">
+          <span className="absolute right-full mr-4 bg-white text-gray-800 text-sm font-bold px-4 py-2 rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap hidden sm:block border border-gray-100 top-1/2 -translate-y-1/2">
             Hubungi via WhatsApp
           </span>
         </a>
@@ -1133,7 +1157,7 @@ export default function App() {
               </div>
               <button 
                 type="submit" 
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_8px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5 mt-4"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_8px_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 mt-4"
               >
                 Masuk ke Dasbor
               </button>
@@ -1144,6 +1168,38 @@ export default function App() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Floating Music Button (Pojok Kiri Bawah) */}
+      <div className="fixed bottom-6 left-6 md:bottom-8 md:left-8 z-50 animate-in fade-in slide-in-from-bottom-10 group">
+        <button
+          onClick={() => setMusicEnabled(!musicEnabled)}
+          className={`p-3 md:p-4 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.2)] flex items-center justify-center transition-all duration-300 hover:scale-110 border ${
+            musicEnabled
+              ? 'bg-indigo-600 text-white border-indigo-500 shadow-indigo-600/50'
+              : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+          }`}
+          title={musicEnabled ? "Matikan Musik Latar" : "Putar Musik Latar"}
+        >
+          {musicEnabled ? <Volume2 className="w-6 h-6 md:w-7 md:h-7 animate-pulse" /> : <VolumeX className="w-6 h-6 md:w-7 md:h-7" />}
+        </button>
+        <span className="absolute left-full ml-4 bg-white text-gray-800 text-sm font-bold px-4 py-2 rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap hidden sm:block border border-gray-100 top-1/2 -translate-y-1/2">
+          {musicEnabled ? "Matikan Suara" : "Putar Suara"}
+        </span>
+      </div>
+
+      {/* Hidden YouTube Iframe */}
+      {musicEnabled && (
+        <div style={{ position: 'fixed', top: '-2000px', left: '-2000px', width: '10px', height: '10px', opacity: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+          <iframe
+            width="200"
+            height="200"
+            src="https://www.youtube.com/embed/gSpL-6AQy5I?autoplay=1&loop=1&playlist=gSpL-6AQy5I&controls=0&showinfo=0&autohide=1&mute=0"
+            title="Background Music"
+            allow="autoplay; encrypted-media"
+            frameBorder="0"
+          ></iframe>
         </div>
       )}
     </div>
@@ -1357,7 +1413,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
             alt="Pemandangan Desa" 
             className="w-full h-full object-cover transition-transform duration-[10s] hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-indigo-900/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-indigo-950/80 to-transparent"></div>
         </div>
 
         {isAdmin && (
@@ -1397,13 +1453,13 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight drop-shadow-2xl">
             Desa <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-indigo-100">{dataBeranda.namaDesa}</span>
           </h1>
-          <p className="text-lg md:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto font-medium leading-relaxed drop-shadow-lg whitespace-pre-line">
+          <p className="text-lg md:text-2xl text-indigo-50 mb-10 max-w-3xl mx-auto font-medium leading-relaxed drop-shadow-lg whitespace-pre-line">
             {dataBeranda.deskripsiDesa}
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-5">
             <button 
               onClick={() => navigateTo('profil')}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg py-4 px-10 rounded-2xl shadow-[0_10px_25px_rgba(67,56,202,0.4)] transition-all transform hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(67,56,202,0.5)] border border-indigo-500"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg py-4 px-10 rounded-2xl shadow-[0_10px_25px_rgba(79,70,229,0.4)] transition-all transform hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(79,70,229,0.5)] border border-indigo-500"
             >
               Profil Desa
             </button>
@@ -1462,8 +1518,9 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
         </div>
       </section>
 
-      <section className="py-20 relative bg-indigo-900 overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?w=1920&q=80')", backgroundSize: 'cover', backgroundPosition: 'center', filter: 'grayscale(100%)' }}></div>
+      <section className="py-20 relative bg-slate-900 overflow-hidden">
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?w=1920&q=80')", backgroundSize: 'cover', backgroundPosition: 'center', filter: 'grayscale(100%) mix-blend-overlay' }}></div>
+        <div className="absolute inset-0 bg-indigo-900/40 mix-blend-multiply"></div>
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 text-center">
@@ -1481,17 +1538,17 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               }
 
               return (
-                <div key={stat.id} className="p-4 sm:p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:bg-white/10 transition-colors flex flex-col justify-center h-full relative overflow-hidden">
+                <div key={stat.id} className="p-4 sm:p-6 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:bg-white/20 transition-colors flex flex-col justify-center h-full relative overflow-hidden">
                   <div className="text-3xl sm:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md">{displayNum}</div>
                   <div className="text-indigo-200 font-bold text-xs sm:text-lg tracking-wide">{stat.label}</div>
 
                   {stat.id === 1 && (
                     <div className="flex justify-between items-stretch gap-2 mt-4 pt-4 border-t border-white/20 w-full">
-                      <div className="flex flex-col items-center justify-center w-1/2 bg-white/10 rounded-xl py-2 px-1 shadow-inner border border-white/5">
+                      <div className="flex flex-col items-center justify-center w-1/2 bg-white/10 rounded-xl py-2 px-1 shadow-inner border border-white/5 hover:bg-white/20 transition">
                         <span className="font-black text-white text-sm sm:text-xl leading-none drop-shadow-md">{displayLaki}</span>
                         <span className="text-[6px] sm:text-[11px] text-indigo-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Laki-laki</span>
                       </div>
-                      <div className="flex flex-col items-center justify-center w-1/2 bg-white/10 rounded-xl py-2 px-1 shadow-inner border border-white/5">
+                      <div className="flex flex-col items-center justify-center w-1/2 bg-white/10 rounded-xl py-2 px-1 shadow-inner border border-white/5 hover:bg-white/20 transition">
                         <span className="font-black text-white text-sm sm:text-xl leading-none drop-shadow-md">{displayPerempuan}</span>
                         <span className="text-[6px] sm:text-[11px] text-indigo-100 font-bold uppercase tracking-wider mt-1.5 text-center break-words whitespace-normal leading-tight w-full">Perempuan</span>
                       </div>
@@ -1897,7 +1954,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
+                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_10px_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5">
                   <Save className="w-5 h-5 mr-2" /> Simpan Perubahan Beranda
                 </button>
               </div>
@@ -2266,7 +2323,7 @@ function HalamanProfilDesa({ isAdmin, daftarProfil, setDaftarProfil, initialTabI
                 <button type="button" onClick={() => setShowEditor(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
+                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_10px_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5">
                   <Save className="w-5 h-5 mr-2" /> Simpan Profil
                 </button>
               </div>
@@ -2385,7 +2442,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
   // Tinggi Container Dinamis
   const containerHeight = kasunRowCount === 0 ? 950 : 1300 + ((kasunRowCount - 1) * 340);
 
-  // Desain Card Perangkat Persis Screenshot
+  // Desain Card Perangkat Persis Gambar
   const PerangkatCard = ({ p }: any) => (
     <div style={{ width: '160px', height: '260px' }} className="bg-white border-[3px] border-black overflow-hidden relative flex flex-col items-center shadow-lg group z-10">
        {isAdmin && (
@@ -2395,7 +2452,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
          </div>
        )}
        
-       <div style={{ height: '180px' }} className="w-full bg-red-600 border-b-[3px] border-black flex-shrink-0">
+       <div style={{ height: '180px' }} className="w-full bg-blue-600 border-b-[3px] border-black flex-shrink-0">
           <img 
             src={p.foto} 
             alt={p.nama} 
@@ -2438,7 +2495,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
               <div className="mb-10 flex justify-end bg-indigo-50 p-4 rounded-2xl border border-indigo-100 shadow-sm max-w-6xl mx-auto">
                 <button 
                   onClick={() => openEditorPerangkat()} 
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_10px_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
                 >
                   <Plus className="w-5 h-5 mr-2" /> Tambah Perangkat
                 </button>
@@ -2485,7 +2542,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                   {/* --- KARTU PERANGKAT DESA (NODES) --- */}
                   
                   {/* Kotak BPD (Statis) */}
-                  <div style={{ position: 'absolute', left: '170px', top: '80px', width: '160px', height: '80px', zIndex: 10 }} className="bg-white border-[3px] border-black flex items-center justify-center font-black text-2xl shadow-lg tracking-widest">
+                  <div style={{ position: 'absolute', left: '170px', top: '80px', width: '160px', height: '80px', zIndex: 10 }} className="bg-white border-[3px] border-black flex items-center justify-center font-black text-2xl shadow-lg tracking-widest text-indigo-900">
                     BPD
                   </div>
 
@@ -2736,7 +2793,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                 <button type="button" onClick={() => setShowEditorPerangkat(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
+                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_10px_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5">
                   <Save className="w-5 h-5 mr-2" /> Simpan Data
                 </button>
               </div>
@@ -2833,7 +2890,7 @@ function HalamanPemerintahan({ isAdmin, activeTab, daftarPerangkat, setDaftarPer
                 <button type="button" onClick={() => setShowEditorLembaga(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
+                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_10px_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5">
                   <Save className="w-5 h-5 mr-2" /> Simpan Data
                 </button>
               </div>
@@ -3061,7 +3118,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                   <div className="mb-10 flex justify-end bg-indigo-50 p-4 rounded-2xl border border-indigo-100 shadow-sm max-w-6xl mx-auto">
                     <button 
                       onClick={() => openEditorBerita()} 
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_10px_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
                     >
                       <Plus className="w-5 h-5 mr-2" /> Tulis Berita Baru
                     </button>
@@ -3141,7 +3198,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
               <div className="mb-10 flex justify-end bg-indigo-50 p-4 rounded-2xl border border-indigo-100 shadow-sm max-w-4xl mx-auto">
                 <button 
                   onClick={() => { setEditDataGrafik(dataGrafik); setShowEditorGrafik(true); }} 
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 px-8 rounded-xl shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_10px_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 flex items-center transition-all"
                 >
                   <Edit className="w-5 h-5 mr-2" /> Edit Angka Grafik
                 </button>
@@ -3365,7 +3422,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
                 <button type="button" onClick={() => setShowEditorBerita(false)} className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(67,56,202,0.3)] hover:shadow-[0_10px_25px_rgba(67,56,202,0.4)] hover:-translate-y-0.5">
+                <button type="submit" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center transition-all shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_10px_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5">
                   <Save className="w-5 h-5 mr-2" /> Simpan Berita
                 </button>
               </div>
@@ -3479,7 +3536,7 @@ function HalamanKontak() {
                   </div>
                   <div className="pt-1">
                     <h4 className="font-extrabold text-gray-900 text-xl">Telepon / WhatsApp</h4>
-                    <p className="text-gray-600 mt-2 text-lg font-medium">+62 852-7971-1678</p>
+                    <p className="text-gray-600 mt-2 text-lg font-medium">+62 822-6876-4585</p>
                   </div>
                 </div>
                 <div className="flex items-start group">
@@ -3507,7 +3564,7 @@ function HalamanKontak() {
           {/* Menambahkan tag tautan (a) untuk membuat peta dapat diklik */}
           <div className="bg-white p-3 rounded-3xl shadow-xl h-full min-h-[500px] border border-gray-100">
             <a 
-              href="https://maps.app.goo.gl/ZNSJokDqvJHrnMtP9" 
+              href="https://maps.app.goo.gl/YUxS68MLjqc1JLrR6" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="block w-full h-full bg-gray-100 rounded-2xl flex flex-col items-center justify-center text-gray-500 overflow-hidden relative group cursor-pointer"
@@ -3519,7 +3576,7 @@ function HalamanKontak() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>
               <div className="absolute inset-0 flex flex-col items-center justify-center transition-transform duration-300 group-hover:-translate-y-2">
-                 <div className="bg-white p-4 rounded-full shadow-2xl mb-4 group-hover:shadow-[0_0_30px_rgba(67,56,202,0.6)] transition-all">
+                 <div className="bg-white p-4 rounded-full shadow-2xl mb-4 group-hover:shadow-[0_0_30px_rgba(79,70,229,0.6)] transition-all">
                    <MapPin className="w-10 h-10 text-indigo-600" />
                  </div>
                  <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4">Lokasi Kantor <br/> Desa Upang Mulya</span>
