@@ -2044,7 +2044,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                               type="text" 
                               value={displayPerempuan}
                               disabled
-                              className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed" 
+                              className="w-full px-5 py-2 border border-slate-300 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed" 
                             />
                           </div>
                           <div className="col-span-2 text-[11px] text-amber-600 font-bold mt-1 leading-tight">
