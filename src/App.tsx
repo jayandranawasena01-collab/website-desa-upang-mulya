@@ -22,7 +22,7 @@ let auth: any = null;
 let db: any = null;
 let appId = 'desa-upang-mulya';
 
-// ================= KONFIGURASI DATABASE MANUAL =================
+// ================= KONFIGURASI DATABASE MANUAL (MILIK ANDA) =================
 const firebaseConfigManual = {
   apiKey: "AIzaSyDDRuhPQdJvX69T-NtlMxaae-Tc6vnj8kM",
   authDomain: "web-desa-upang-mulya.firebaseapp.com",
@@ -104,7 +104,7 @@ const AnimatedNumber = ({ value }: { value: string | number }) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
       
-      // Easing function: easeOutExpo untuk pergerakan elegan melambat di akhir
+      // Easing function: easeOutExpo
       const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
       
       setCount(Math.floor(easeProgress * target));
@@ -140,15 +140,6 @@ const initialBerita = [
     kategori: "Kegiatan",
     gambar: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
     excerpt: "Mengantisipasi datangnya musim penghujan, warga Desa Upang Mulya bergotong royong membersihkan saluran air dan fasilitas umum guna mencegah banjir...\n\nKegiatan ini diikuti oleh seluruh elemen masyarakat. Selain membersihkan selokan, warga juga melakukan pemangkasan dahan pohon yang rawan tumbang serta membersihkan area pekarangan fasilitas umum.",
-    galeri: []
-  },
-  {
-    id: 3,
-    judul: "Pelatihan Pembuatan Pupuk Kompos untuk Kelompok Tani",
-    tanggal: "28 Sep 2024",
-    kategori: "Pemberdayaan",
-    gambar: "https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    excerpt: "BUMDes bekerja sama dengan penyuluh pertanian kecamatan mengadakan pelatihan pembuatan pupuk kompos organik yang diikuti oleh petani lokal Upang Mulya...\n\nPelatihan ini bertujuan untuk meningkatkan kemandirian petani dalam penyediaan pupuk, menekan biaya produksi pertanian, sekaligus mengedukasi warga tentang pengelolaan limbah organik.",
     galeri: []
   }
 ];
@@ -349,7 +340,7 @@ export default function App() {
           await signInAnonymously(auth);
         }
       } catch (error: any) {
-        console.warn("Berjalan dalam Mode Lokal. Hubungkan ke Firebase jika ingin sinkronisasi online.");
+        console.warn("Berjalan dalam Mode Lokal secara diam-diam. Hubungkan ke Firebase jika ingin sinkronisasi online.");
         setIsDbConnected(false);
       }
     };
@@ -383,7 +374,7 @@ export default function App() {
     };
 
     const handleServerError = (err: any) => {
-      console.warn("Beralih ke mode lokal secara otomatis karena akses sinkronisasi Firebase memerlukan pengaturan rules.");
+      console.warn("Beralih ke mode lokal otomatis.");
       setIsDbConnected(false);
     };
 
@@ -645,8 +636,23 @@ export default function App() {
       </style>
 
       {/* Header & Navbar - Indigo Elegant Theme */}
-      <header className="bg-gradient-to-r from-indigo-950 via-indigo-900 to-indigo-950 text-white sticky top-0 z-40 shadow-xl border-b border-indigo-800">
-        <div className="container mx-auto px-4 lg:px-8">
+      <header className="bg-gradient-to-r from-indigo-950 via-indigo-900 to-indigo-950 text-white sticky top-0 z-40 shadow-xl border-b border-indigo-800 flex flex-col">
+        
+        {/* GALERI ROLL TEPAT DI ATAS HEADER MENU */}
+        {dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 && (
+          <div className="w-full overflow-hidden bg-black/40 border-b border-white/10 pt-2 pb-2 order-first">
+             <div className="animate-gallery-roll gap-3 px-2">
+                {/* Diduplikat 4x agar animasi loop berjalan sangat mulus untuk layar lebar */}
+                {[...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader].map((img: any, idx: number) => (
+                   <div key={idx} className="w-[23.5vw] h-16 sm:h-20 md:h-24 rounded-lg overflow-hidden flex-shrink-0 shadow-md group cursor-pointer bg-indigo-900/50 border border-white/10">
+                      <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                   </div>
+                ))}
+             </div>
+          </div>
+        )}
+
+        <div className="container mx-auto px-4 lg:px-8 order-last">
           <div className="flex justify-between items-center py-3">
             {/* Logo */}
             <div 
@@ -1429,8 +1435,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
           </div>
         )}
         
-        {/* pb-56 agar tidak menabrak galeri yang ada di bagian bawah */}
-        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white pb-56 md:pb-64">
+        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white pb-10 mt-10">
           
           {dataBeranda.logoHero && (
             <img 
@@ -1471,20 +1476,6 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
             </button>
           </div>
         </div>
-
-        {/* GALERI ROLL HEADER */}
-        {dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 && (
-          <div className="absolute bottom-28 md:bottom-32 left-0 w-full overflow-hidden z-20">
-             <div className="animate-gallery-roll gap-4 px-2">
-                {/* Diduplikat 4x agar animasi loop berjalan sangat mulus untuk layar lebar */}
-                {[...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader].map((img: any, idx: number) => (
-                   <div key={idx} className="w-[70vw] sm:w-[45vw] md:w-[24vw] h-32 md:h-48 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.3)] group cursor-pointer bg-indigo-900/50">
-                      <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                   </div>
-                ))}
-             </div>
-          </div>
-        )}
         
         <div className="absolute bottom-0 left-0 right-0 z-10">
           <svg viewBox="0 0 1440 120" className="fill-slate-50 w-full h-auto block">
@@ -1854,6 +1845,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                 </div>
               </div>
 
+              {/* EDITOR GALERI ROLL HEADER */}
               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
                 <h4 className="font-extrabold text-lg text-indigo-800 mb-4 flex items-center">
                    <span className="w-6 h-1 bg-amber-500 rounded-full mr-3"></span> Galeri Roll Beranda (Maks. 10 Foto)
@@ -1863,7 +1855,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                      <Upload className="w-5 h-5 mr-2" /> Upload Foto Galeri
                      <input type="file" accept="image/*" className="hidden" onChange={handleGaleriHeaderUpload} />
                    </label>
-                   <p className="text-sm text-slate-500 mt-2 font-medium">Foto akan berjalan otomatis ke kanan. (Saat ini: {editForm.galeriHeader?.length || 0}/10)</p>
+                   <p className="text-sm text-slate-500 mt-2 font-medium">Foto akan tampil di atas menu dan otomatis berjalan ke kanan. (Saat ini: {editForm.galeriHeader?.length || 0}/10)</p>
                 </div>
                 
                 {editForm.galeriHeader && editForm.galeriHeader.length > 0 && (
