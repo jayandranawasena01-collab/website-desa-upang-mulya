@@ -1588,24 +1588,24 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                 <div key={stat.id} className="p-3 min-[400px]:p-5 sm:p-8 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:bg-white/10 hover:-translate-y-2 transition-all duration-300 flex flex-col justify-center h-full relative overflow-hidden group">
                   <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
                   
-                  <div className="text-3xl min-[380px]:text-4xl sm:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md z-10 truncate w-full px-1">
+                  <div className="text-3xl min-[380px]:text-4xl sm:text-4xl md:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md z-10 w-full px-1">
                      <AnimatedNumber value={displayNum} />
                   </div>
-                  <div className="text-indigo-200 font-bold text-[10px] min-[380px]:text-xs sm:text-lg tracking-wide z-10 truncate w-full px-1">{stat.label}</div>
+                  <div className="text-indigo-200 font-bold text-[10px] min-[380px]:text-xs sm:text-sm md:text-base lg:text-lg tracking-wide z-10 w-full px-1 leading-tight break-words">{stat.label}</div>
 
                   {stat.id === 1 && (
                     <div className="flex justify-between items-stretch gap-1.5 sm:gap-2 mt-3 sm:mt-5 pt-3 sm:pt-5 border-t border-white/20 w-full z-10">
                       <div className="flex flex-col items-center justify-center w-1/2 bg-indigo-900/50 rounded-lg sm:rounded-xl py-2 px-1 sm:py-3 sm:px-2 shadow-inner border border-indigo-800/50 overflow-hidden">
-                        <span className="font-black text-amber-300 text-[11px] min-[380px]:text-sm sm:text-xl leading-none drop-shadow-md truncate w-full text-center">
+                        <span className="font-black text-amber-300 text-[11px] min-[380px]:text-sm sm:text-base md:text-lg lg:text-xl leading-none drop-shadow-md w-full text-center">
                           <AnimatedNumber value={displayLaki} />
                         </span>
-                        <span className="text-[7px] min-[380px]:text-[8px] sm:text-[11px] text-indigo-100 font-bold uppercase tracking-wider mt-1 sm:mt-2 text-center w-full truncate">Laki-laki</span>
+                        <span className="text-[7px] min-[380px]:text-[8px] sm:text-[9px] md:text-[10px] lg:text-[11px] text-indigo-100 font-bold uppercase tracking-wider mt-1 sm:mt-2 text-center w-full leading-tight">Laki-laki</span>
                       </div>
                       <div className="flex flex-col items-center justify-center w-1/2 bg-indigo-900/50 rounded-lg sm:rounded-xl py-2 px-1 sm:py-3 sm:px-2 shadow-inner border border-indigo-800/50 overflow-hidden">
-                        <span className="font-black text-rose-300 text-[11px] min-[380px]:text-sm sm:text-xl leading-none drop-shadow-md truncate w-full text-center">
+                        <span className="font-black text-rose-300 text-[11px] min-[380px]:text-sm sm:text-base md:text-lg lg:text-xl leading-none drop-shadow-md w-full text-center">
                           <AnimatedNumber value={displayPerempuan} />
                         </span>
-                        <span className="text-[7px] min-[380px]:text-[8px] sm:text-[11px] text-indigo-100 font-bold uppercase tracking-wider mt-1 sm:mt-2 text-center w-full truncate">Perempuan</span>
+                        <span className="text-[7px] min-[380px]:text-[8px] sm:text-[9px] md:text-[10px] lg:text-[11px] text-indigo-100 font-bold uppercase tracking-wider mt-1 sm:mt-2 text-center w-full leading-tight">Perempuan</span>
                       </div>
                     </div>
                   )}
