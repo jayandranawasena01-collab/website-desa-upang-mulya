@@ -1595,17 +1595,17 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
 
                   {stat.id === 1 && (
                     <div className="flex justify-between items-stretch gap-2 mt-4 pt-4 border-t border-white/20 w-full z-10">
-                      <div className="flex flex-col items-center justify-center w-1/2 bg-black/20 rounded-xl py-2.5 px-1 shadow-inner border border-white/10">
-                        <span className="font-black text-amber-400 text-xs min-[380px]:text-sm md:text-base lg:text-lg leading-none drop-shadow-md text-center">
+                      <div className="flex flex-col items-center justify-center w-1/2 bg-black/20 rounded-xl py-2 px-1 shadow-inner border border-white/10">
+                        <span className="font-black text-amber-400 text-[11px] sm:text-sm md:text-base lg:text-lg leading-none drop-shadow-md whitespace-nowrap">
                           <AnimatedNumber value={displayLaki} />
                         </span>
-                        <span className="text-[8px] min-[380px]:text-[9px] md:text-[9px] lg:text-xs text-white font-bold uppercase mt-1.5 text-center leading-tight break-words whitespace-normal">LAKI-LAKI</span>
+                        <span className="text-[7px] sm:text-[9px] md:text-[10px] text-white font-bold uppercase mt-1 tracking-wider whitespace-nowrap">LAKI-LAKI</span>
                       </div>
-                      <div className="flex flex-col items-center justify-center w-1/2 bg-black/20 rounded-xl py-2.5 px-1 shadow-inner border border-white/10">
-                        <span className="font-black text-rose-300 text-xs min-[380px]:text-sm md:text-base lg:text-lg leading-none drop-shadow-md text-center">
+                      <div className="flex flex-col items-center justify-center w-1/2 bg-black/20 rounded-xl py-2 px-1 shadow-inner border border-white/10">
+                        <span className="font-black text-rose-300 text-[11px] sm:text-sm md:text-base lg:text-lg leading-none drop-shadow-md whitespace-nowrap">
                           <AnimatedNumber value={displayPerempuan} />
                         </span>
-                        <span className="text-[8px] min-[380px]:text-[9px] md:text-[9px] lg:text-xs text-white font-bold uppercase mt-1.5 text-center leading-tight break-words whitespace-normal">PEREMPUAN</span>
+                        <span className="text-[7px] sm:text-[9px] md:text-[10px] text-white font-bold uppercase mt-1 tracking-wider whitespace-nowrap">PEREMPUAN</span>
                       </div>
                     </div>
                   )}
@@ -2044,7 +2044,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                               type="text" 
                               value={displayPerempuan}
                               disabled
-                              className="w-full px-5 py-2 border border-slate-300 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed" 
+                              className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed" 
                             />
                           </div>
                           <div className="col-span-2 text-[11px] text-amber-600 font-bold mt-1 leading-tight">
@@ -3630,7 +3630,6 @@ function HalamanKontak() {
                  <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4">Lokasi Kantor <br/> Desa Upang Mulya</span>
               </div>
             </a>
-            {/* Menggunakan iframe Google Maps atau gambar placeholder jika iframe tidak ada */}
             <iframe 
                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15939.336440263236!2d104.9197999!3d-2.5186000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e3b6d21394f9999%3A0x8671694f4a36f56c!2sUpang%20Mulya%2C%20Makarti%20Jaya%2C%20Banyuasin%20Regency%2C%20South%20Sumatra!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid" 
                width="100%" 
