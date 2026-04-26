@@ -667,7 +667,6 @@ export default function App() {
                 <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight leading-none drop-shadow-md">Desa Upang Mulya</h1>
                 <p className="text-xs md:text-sm lg:text-base text-indigo-300 font-medium mt-1 lg:mt-2 tracking-wide uppercase">Kec. Makarti Jaya, Kab. Banyuasin</p>
                 <p className="text-xs md:text-sm lg:text-base text-indigo-300 font-medium mt-1 lg:mt-2 tracking-wide uppercase">Provinsi Sumatera Selatan</p>
-                <p className="text-xs md:text-sm lg:text-base text-indigo-300 font-medium mt-1 lg:mt-2 tracking-wide uppercase">Jl. Sunan Kalijaga Dusun II, Kec. Makarti Jaya, Kab. Banyuasin, Sumsel 30972</p>
               </div>
             </div>
 
