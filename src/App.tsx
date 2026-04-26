@@ -227,7 +227,6 @@ const initialBeranda = {
     { id: 3, num: "3", label: "Dusun" },
     { id: 4, num: "16", label: "Rukun Tetangga (RT)" }
   ],
-  // Data Galeri telah disesuaikan agar menampilkan 10 foto (4 tampil, 6 menunggu)
   galeriHeader: [
     { id: 1, url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
     { id: 2, url: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
@@ -315,6 +314,11 @@ export default function App() {
   const [daftarLembaga, setDaftarLembaga] = useState(() => getInitialData('upang_mulya_lembaga', initialLembaga));
   const [daftarProfil, setDaftarProfil] = useState(() => getInitialData('upang_mulya_profil', initialProfil));
   const [dataBeranda, setDataBeranda] = useState(() => getInitialData('upang_mulya_beranda', initialBeranda));
+
+  // Mendeklarasikan data rendering untuk Galeri di sini agar aman untuk Vercel SSR
+  const galeriToRender = (dataBeranda?.galeriHeader?.length > 0) 
+    ? dataBeranda.galeriHeader 
+    : initialBeranda.galeriHeader;
 
   // ================= MONITORING KONEKSI =================
   useEffect(() => {
@@ -646,202 +650,221 @@ export default function App() {
       <header className="bg-gradient-to-r from-indigo-950 via-indigo-900 to-indigo-950 text-white sticky top-0 z-40 shadow-xl border-b border-indigo-800 flex flex-col">
         
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="flex justify-between items-center py-3">
-            {/* Logo */}
+          <div className="flex justify-between items-center py-4 lg:py-5 gap-6">
+            
+            {/* KIRI: Logo dan Tulisan Diperbesar */}
             <div 
-              className="flex items-center gap-4 cursor-pointer group"
+              className="flex items-center gap-4 md:gap-5 cursor-pointer group flex-shrink-0"
               onClick={() => navigateTo('beranda')}
             >
-              <div className="bg-white/10 backdrop-blur-md p-1.5 rounded-xl border border-white/20 group-hover:bg-white transition duration-500 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden shadow-lg">
+              <div className="bg-white/10 backdrop-blur-md p-2 lg:p-3 rounded-2xl border border-white/20 group-hover:bg-white transition duration-500 w-14 h-14 md:w-20 md:h-20 lg:w-24 lg:h-24 flex items-center justify-center overflow-hidden shadow-lg">
                 {dataBeranda.headerLogo ? (
                   <img src={dataBeranda.headerLogo} alt="Logo" className="w-full h-full object-contain" />
                 ) : (
-                  <Landmark className="h-6 w-6 md:h-7 md:w-7 text-amber-400 group-hover:text-indigo-900 transition duration-500" />
+                  <Landmark className="h-8 w-8 md:h-12 md:w-12 lg:h-14 lg:w-14 text-amber-400 group-hover:text-indigo-900 transition duration-500" />
                 )}
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-2xl font-extrabold tracking-tight leading-none drop-shadow-md">Desa Upang Mulya</h1>
-                <p className="text-xs text-indigo-300 font-medium mt-1 tracking-wide uppercase">Kec. Makarti Jaya, Kab. Banyuasin</p>
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight leading-none drop-shadow-md">Desa Upang Mulya</h1>
+                <p className="text-xs md:text-sm lg:text-base text-indigo-300 font-medium mt-1 lg:mt-2 tracking-wide uppercase">Kec. Makarti Jaya, Kab. Banyuasin</p>
               </div>
             </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner">
-              <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
+            {/* KANAN: Navigasi dan Galeri (Khusus Desktop) */}
+            <div className="hidden lg:flex flex-col items-end flex-grow max-w-[850px]">
               
-              {/* Dropdown Profil Desa */}
-              <div className="relative" onClick={(e: any) => e.stopPropagation()}>
-                <button
-                  onClick={() => {
-                    setIsDesktopPemerintahOpen(false);
-                    setIsDesktopBeritaOpen(false);
-                    if (currentPage === 'profil') {
-                      setIsDesktopProfilOpen(!isDesktopProfilOpen);
-                    } else {
-                      navigateTo('profil', activeProfilTab || daftarProfil[0]?.id);
-                      setIsDesktopProfilOpen(true);
-                    }
-                  }}
-                  className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
-                    currentPage === 'profil'
-                      ? 'bg-amber-500 text-indigo-950 shadow-[0_0_15px_rgba(245,158,11,0.5)]'
-                      : 'text-white hover:bg-white/10 hover:text-amber-300'
-                  }`}
-                >
-                  <Info className="w-4 h-4 mr-2" />
-                  Profil Desa
-                  <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-500 ${isDesktopProfilOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                <div className={`absolute top-full left-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-100 transition-all duration-300 transform origin-top-left z-50 overflow-hidden ${
-                  isDesktopProfilOpen ? 'opacity-100 visible translate-y-0 scale-100' : 'opacity-0 invisible -translate-y-4 scale-95'
-                }`}>
-                  <div className="flex flex-col py-2">
-                    {daftarProfil.map((profil: any) => (
-                      <button
-                        key={profil.id}
-                        onClick={(e: any) => {
-                          e.stopPropagation();
-                          navigateTo('profil', profil.id);
-                        }}
-                        className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
-                           String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
-                             ? 'text-indigo-700 bg-indigo-50/80 pl-6'
-                             : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:pl-6'
-                        }`}
-                      >
-                         {String(activeProfilTab) === String(profil.id) && currentPage === 'profil' && (
-                           <span className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-r-full"></span>
-                         )}
-                         {profil.judul}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Dropdown Pemerintah Desa */}
-              <div className="relative" onClick={(e: any) => e.stopPropagation()}>
-                <button
-                  onClick={() => {
-                    setIsDesktopProfilOpen(false);
-                    setIsDesktopBeritaOpen(false);
-                    if (currentPage === 'pemerintah') {
-                      setIsDesktopPemerintahOpen(!isDesktopPemerintahOpen);
-                    } else {
-                      navigateTo('pemerintah', activePemerintahTab || 'perangkat');
-                      setIsDesktopPemerintahOpen(true);
-                    }
-                  }}
-                  className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
-                    currentPage === 'pemerintah'
-                      ? 'bg-amber-500 text-indigo-950 shadow-[0_0_15px_rgba(245,158,11,0.5)]'
-                      : 'text-white hover:bg-white/10 hover:text-amber-300'
-                  }`}
-                >
-                  <Users className="w-4 h-4 mr-2" />
-                  Pemerintah Desa
-                  <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-500 ${isDesktopPemerintahOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                <div className={`absolute top-full left-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-100 transition-all duration-300 transform origin-top-left z-50 overflow-hidden ${
-                  isDesktopPemerintahOpen ? 'opacity-100 visible translate-y-0 scale-100' : 'opacity-0 invisible -translate-y-4 scale-95'
-                }`}>
-                  <div className="flex flex-col py-2">
-                    {menuPemerintah.map((menu) => (
-                      <button
-                        key={menu.id}
-                        onClick={(e: any) => {
-                          e.stopPropagation();
-                          navigateTo('pemerintah', menu.id);
-                        }}
-                        className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
-                           activePemerintahTab === menu.id && currentPage === 'pemerintah'
-                             ? 'text-indigo-700 bg-indigo-50/80 pl-6'
-                             : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:pl-6'
-                        }`}
-                      >
-                         {activePemerintahTab === menu.id && currentPage === 'pemerintah' && (
-                           <span className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-r-full"></span>
-                         )}
-                         {menu.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Dropdown Berita & Grafik */}
-              <div className="relative" onClick={(e: any) => e.stopPropagation()}>
-                <button
-                  onClick={() => {
-                    setIsDesktopProfilOpen(false);
-                    setIsDesktopPemerintahOpen(false);
-                    if (currentPage === 'berita') {
-                      setIsDesktopBeritaOpen(!isDesktopBeritaOpen);
-                    } else {
-                      navigateTo('berita', activeBeritaTab || 'list-berita');
-                      setIsDesktopBeritaOpen(true);
-                    }
-                  }}
-                  className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
-                    currentPage === 'berita'
-                      ? 'bg-amber-500 text-indigo-950 shadow-[0_0_15px_rgba(245,158,11,0.5)]'
-                      : 'text-white hover:bg-white/10 hover:text-amber-300'
-                  }`}
-                >
-                  <Newspaper className="w-4 h-4 mr-2" />
-                  Berita
-                  <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-500 ${isDesktopBeritaOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                <div className={`absolute top-full left-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-100 transition-all duration-300 transform origin-top-left z-50 overflow-hidden ${
-                  isDesktopBeritaOpen ? 'opacity-100 visible translate-y-0 scale-100' : 'opacity-0 invisible -translate-y-4 scale-95'
-                }`}>
-                  <div className="flex flex-col py-2">
-                    {menuBerita.map((menu) => (
-                      <button
-                        key={menu.id}
-                        onClick={(e: any) => {
-                          e.stopPropagation();
-                          navigateTo('berita', menu.id);
-                        }}
-                        className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
-                           activeBeritaTab === menu.id && currentPage === 'berita'
-                             ? 'text-indigo-700 bg-indigo-50/80 pl-6'
-                             : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:pl-6'
-                        }`}
-                      >
-                         {activeBeritaTab === menu.id && currentPage === 'berita' && (
-                           <span className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-r-full"></span>
-                         )}
-                         <div className="flex items-center">
-                           {menu.id === 'list-berita' ? <Newspaper className="w-4 h-4 mr-2 opacity-70" /> : <PieChart className="w-4 h-4 mr-2 opacity-70" />}
-                           {menu.label}
-                         </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <NavButton active={currentPage === 'kontak'} onClick={() => navigateTo('kontak')} icon={<Phone className="w-4 h-4 mr-2" />}>Kontak</NavButton>
-              
-              {/* Tombol Admin Panel */}
-              <div className="pl-2 ml-1 border-l border-white/20 flex items-center gap-2">
-                {isAdmin ? (
-                  <>
-                    <button onClick={handleLogout} className="flex items-center text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(244,63,94,0.4)]">
-                      <LogOut className="w-4 h-4 mr-2" /> Keluar
-                    </button>
-                  </>
-                ) : (
-                  <button onClick={() => setShowLoginModal(true)} className="flex items-center text-sm font-bold bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl transition border border-white/10">
-                    <LogIn className="w-4 h-4 mr-2" /> Admin
+              {/* Desktop Navigation */}
+              <nav className="flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner w-full justify-between mb-3">
+                <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
+                
+                {/* Dropdown Profil Desa */}
+                <div className="relative" onClick={(e: any) => e.stopPropagation()}>
+                  <button
+                    onClick={() => {
+                      setIsDesktopPemerintahOpen(false);
+                      setIsDesktopBeritaOpen(false);
+                      if (currentPage === 'profil') {
+                        setIsDesktopProfilOpen(!isDesktopProfilOpen);
+                      } else {
+                        navigateTo('profil', activeProfilTab || daftarProfil[0]?.id);
+                        setIsDesktopProfilOpen(true);
+                      }
+                    }}
+                    className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+                      currentPage === 'profil'
+                        ? 'bg-amber-500 text-indigo-950 shadow-[0_0_15px_rgba(245,158,11,0.5)]'
+                        : 'text-white hover:bg-white/10 hover:text-amber-300'
+                    }`}
+                  >
+                    <Info className="w-4 h-4 mr-2" />
+                    Profil Desa
+                    <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-500 ${isDesktopProfilOpen ? 'rotate-180' : ''}`} />
                   </button>
-                )}
+
+                  <div className={`absolute top-full left-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-100 transition-all duration-300 transform origin-top-left z-50 overflow-hidden ${
+                    isDesktopProfilOpen ? 'opacity-100 visible translate-y-0 scale-100' : 'opacity-0 invisible -translate-y-4 scale-95'
+                  }`}>
+                    <div className="flex flex-col py-2">
+                      {daftarProfil.map((profil: any) => (
+                        <button
+                          key={profil.id}
+                          onClick={(e: any) => {
+                            e.stopPropagation();
+                            navigateTo('profil', profil.id);
+                          }}
+                          className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
+                             String(activeProfilTab) === String(profil.id) && currentPage === 'profil'
+                               ? 'text-indigo-700 bg-indigo-50/80 pl-6'
+                               : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:pl-6'
+                          }`}
+                        >
+                           {String(activeProfilTab) === String(profil.id) && currentPage === 'profil' && (
+                             <span className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-r-full"></span>
+                           )}
+                           {profil.judul}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dropdown Pemerintah Desa */}
+                <div className="relative" onClick={(e: any) => e.stopPropagation()}>
+                  <button
+                    onClick={() => {
+                      setIsDesktopProfilOpen(false);
+                      setIsDesktopBeritaOpen(false);
+                      if (currentPage === 'pemerintah') {
+                        setIsDesktopPemerintahOpen(!isDesktopPemerintahOpen);
+                      } else {
+                        navigateTo('pemerintah', activePemerintahTab || 'perangkat');
+                        setIsDesktopPemerintahOpen(true);
+                      }
+                    }}
+                    className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+                      currentPage === 'pemerintah'
+                        ? 'bg-amber-500 text-indigo-950 shadow-[0_0_15px_rgba(245,158,11,0.5)]'
+                        : 'text-white hover:bg-white/10 hover:text-amber-300'
+                    }`}
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Pemerintah Desa
+                    <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-500 ${isDesktopPemerintahOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  <div className={`absolute top-full left-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-100 transition-all duration-300 transform origin-top-left z-50 overflow-hidden ${
+                    isDesktopPemerintahOpen ? 'opacity-100 visible translate-y-0 scale-100' : 'opacity-0 invisible -translate-y-4 scale-95'
+                  }`}>
+                    <div className="flex flex-col py-2">
+                      {menuPemerintah.map((menu) => (
+                        <button
+                          key={menu.id}
+                          onClick={(e: any) => {
+                            e.stopPropagation();
+                            navigateTo('pemerintah', menu.id);
+                          }}
+                          className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
+                             activePemerintahTab === menu.id && currentPage === 'pemerintah'
+                               ? 'text-indigo-700 bg-indigo-50/80 pl-6'
+                               : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:pl-6'
+                          }`}
+                        >
+                           {activePemerintahTab === menu.id && currentPage === 'pemerintah' && (
+                             <span className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-r-full"></span>
+                           )}
+                           {menu.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dropdown Berita & Grafik */}
+                <div className="relative" onClick={(e: any) => e.stopPropagation()}>
+                  <button
+                    onClick={() => {
+                      setIsDesktopProfilOpen(false);
+                      setIsDesktopPemerintahOpen(false);
+                      if (currentPage === 'berita') {
+                        setIsDesktopBeritaOpen(!isDesktopBeritaOpen);
+                      } else {
+                        navigateTo('berita', activeBeritaTab || 'list-berita');
+                        setIsDesktopBeritaOpen(true);
+                      }
+                    }}
+                    className={`px-5 py-2.5 rounded-xl font-bold flex items-center transition-all duration-300 text-sm tracking-wide ${
+                      currentPage === 'berita'
+                        ? 'bg-amber-500 text-indigo-950 shadow-[0_0_15px_rgba(245,158,11,0.5)]'
+                        : 'text-white hover:bg-white/10 hover:text-amber-300'
+                    }`}
+                  >
+                    <Newspaper className="w-4 h-4 mr-2" />
+                    Berita
+                    <ChevronDown className={`w-4 h-4 ml-1 opacity-70 transition-transform duration-500 ${isDesktopBeritaOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  <div className={`absolute top-full left-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-100 transition-all duration-300 transform origin-top-left z-50 overflow-hidden ${
+                    isDesktopBeritaOpen ? 'opacity-100 visible translate-y-0 scale-100' : 'opacity-0 invisible -translate-y-4 scale-95'
+                  }`}>
+                    <div className="flex flex-col py-2">
+                      {menuBerita.map((menu) => (
+                        <button
+                          key={menu.id}
+                          onClick={(e: any) => {
+                            e.stopPropagation();
+                            navigateTo('berita', menu.id);
+                          }}
+                          className={`text-left px-5 py-3 text-sm font-bold transition-all duration-200 relative overflow-hidden ${
+                             activeBeritaTab === menu.id && currentPage === 'berita'
+                               ? 'text-indigo-700 bg-indigo-50/80 pl-6'
+                               : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:pl-6'
+                          }`}
+                        >
+                           {activeBeritaTab === menu.id && currentPage === 'berita' && (
+                             <span className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-r-full"></span>
+                           )}
+                           <div className="flex items-center">
+                             {menu.id === 'list-berita' ? <Newspaper className="w-4 h-4 mr-2 opacity-70" /> : <PieChart className="w-4 h-4 mr-2 opacity-70" />}
+                             {menu.label}
+                           </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <NavButton active={currentPage === 'kontak'} onClick={() => navigateTo('kontak')} icon={<Phone className="w-4 h-4 mr-2" />}>Kontak</NavButton>
+                
+                {/* Tombol Admin Panel */}
+                <div className="pl-2 ml-1 border-l border-white/20 flex items-center gap-2">
+                  {isAdmin ? (
+                    <>
+                      <button onClick={handleLogout} className="flex items-center text-sm font-bold bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(244,63,94,0.4)]">
+                        <LogOut className="w-4 h-4 mr-2" /> Keluar
+                      </button>
+                    </>
+                  ) : (
+                    <button onClick={() => setShowLoginModal(true)} className="flex items-center text-sm font-bold bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl transition border border-white/10">
+                      <LogIn className="w-4 h-4 mr-2" /> Admin
+                    </button>
+                  )}
+                </div>
+              </nav>
+
+              {/* Desktop Gallery Roll (Batas Nav Beranda s/d Admin) */}
+              <div className="w-full overflow-hidden bg-black/40 border border-white/10 rounded-xl shadow-inner p-1.5">
+                 <div className="animate-gallery-roll">
+                    {/* Duplikat array 2x agar animasi looping kiri ke kanan mulus sempurna dengan translateX(-50%) */}
+                    {[...galeriToRender, ...galeriToRender].map((img: any, idx: number) => (
+                       <div key={idx} className="w-[180px] xl:w-[208px] px-1.5 flex-shrink-0">
+                          <div className="w-full h-16 xl:h-20 rounded-lg overflow-hidden shadow-lg group cursor-pointer bg-indigo-900/50 border border-white/20 relative hover:border-amber-400 transition-colors">
+                             <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-[10s] ease-linear group-hover:scale-125" />
+                          </div>
+                       </div>
+                    ))}
+                 </div>
               </div>
-            </nav>
+            </div>
 
             {/* Mobile Menu Toggle & Admin */}
             <div className="lg:hidden flex items-center gap-2">
@@ -977,28 +1000,18 @@ export default function App() {
             </div>
         </div>
 
-        {/* GALERI ROLL TEPAT DI BAWAH NAVIGASI (Sesuai dengan screenshot) */}
-        {(() => {
-          // Fallback ini memastikan jika data di Vercel/Firebase kosong, maka tetap merender 10 data dari initialBeranda.
-          const galeriToRender = (dataBeranda && dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0) 
-            ? dataBeranda.galeriHeader 
-            : initialBeranda.galeriHeader;
-          
-          return (
-            <div className="w-full overflow-hidden bg-black/40 border-t border-white/10 pt-3 pb-3 mt-1 shadow-inner">
-               <div className="animate-gallery-roll">
-                  {/* Duplikat array agar animasi looping mulus sempurna */}
-                  {[...galeriToRender, ...galeriToRender, ...galeriToRender, ...galeriToRender].map((img: any, idx: number) => (
-                     <div key={idx} className="w-[25vw] px-1.5 flex-shrink-0">
-                        <div className="w-full h-24 sm:h-32 md:h-40 rounded-lg overflow-hidden shadow-lg group cursor-pointer bg-indigo-900/50 border border-white/20 relative hover:border-amber-400 transition-colors">
-                           <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-[10s] ease-linear group-hover:scale-125" />
-                        </div>
-                     </div>
-                  ))}
-               </div>
-            </div>
-          );
-        })()}
+        {/* Mobile Gallery (Hanya tampil di ukuran Mobile karena Desktop sudah ada di samping Logo) */}
+        <div className="lg:hidden w-full overflow-hidden bg-black/40 border-t border-white/10 p-2 shadow-inner">
+           <div className="animate-gallery-roll">
+              {[...galeriToRender, ...galeriToRender].map((img: any, idx: number) => (
+                 <div key={idx} className="w-[23vw] sm:w-[120px] px-1 flex-shrink-0">
+                    <div className="w-full h-14 sm:h-20 rounded-lg overflow-hidden shadow-lg group cursor-pointer bg-indigo-900/50 border border-white/20 relative hover:border-amber-400 transition-colors">
+                       <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-[10s] ease-linear group-hover:scale-125" />
+                    </div>
+                 </div>
+              ))}
+           </div>
+        </div>
       </header>
 
       {/* Pesan Alert Login Admin Aktif */}
