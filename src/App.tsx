@@ -235,6 +235,12 @@ const initialBeranda = {
     { id: 2, num: "823", label: "Kepala Keluarga" },
     { id: 3, num: "3", label: "Dusun" },
     { id: 4, num: "16", label: "Rukun Tetangga (RT)" }
+  ],
+  galeriHeader: [
+    { id: 1, url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
+    { id: 2, url: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
+    { id: 3, url: "https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
+    { id: 4, url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" }
   ]
 };
 
@@ -600,6 +606,21 @@ export default function App() {
             white-space: nowrap;
             animation: roll-left 15s linear infinite;
           }
+          
+          /* Gallery Roll Animation to the RIGHT */
+          @keyframes slide-right {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+          }
+          .animate-gallery-roll {
+            display: flex;
+            width: max-content;
+            animation: slide-right 40s linear infinite;
+          }
+          .animate-gallery-roll:hover {
+            animation-play-state: paused;
+          }
+
           .custom-scrollbar::-webkit-scrollbar {
             height: 12px;
           }
@@ -1210,6 +1231,31 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
     }
   };
 
+  const handleGaleriHeaderUpload = (e: any) => {
+    const file = e.target.files[0];
+    if (file) {
+      const currentGaleri = editForm.galeriHeader || [];
+      if (currentGaleri.length >= 10) {
+         showAlert("Maksimal 10 foto untuk galeri berjalan.");
+         return;
+      }
+      compressImage(file, 800, false, (base64: any) => {
+        setEditForm((prev: any) => ({ 
+          ...prev, 
+          galeriHeader: [...(prev.galeriHeader || []), { id: Date.now(), url: base64 }] 
+        }));
+      });
+      e.target.value = '';
+    }
+  };
+
+  const hapusGaleriHeader = (id: any) => {
+     setEditForm((prev: any) => ({
+       ...prev,
+       galeriHeader: prev.galeriHeader.filter((img: any) => img.id !== id)
+     }));
+  };
+
   const handleStatChange = (id: any, field: any, value: any) => {
     setEditForm((prev: any) => ({
       ...prev,
@@ -1383,7 +1429,8 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
           </div>
         )}
         
-        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white pb-10">
+        {/* pb-56 agar tidak menabrak galeri yang ada di bagian bawah */}
+        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white pb-56 md:pb-64">
           
           {dataBeranda.logoHero && (
             <img 
@@ -1424,9 +1471,23 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
             </button>
           </div>
         </div>
+
+        {/* GALERI ROLL HEADER */}
+        {dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 && (
+          <div className="absolute bottom-28 md:bottom-32 left-0 w-full overflow-hidden z-20">
+             <div className="animate-gallery-roll gap-4 px-2">
+                {/* Diduplikat 4x agar animasi loop berjalan sangat mulus untuk layar lebar */}
+                {[...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader, ...dataBeranda.galeriHeader].map((img: any, idx: number) => (
+                   <div key={idx} className="w-[70vw] sm:w-[45vw] md:w-[24vw] h-32 md:h-48 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.3)] group cursor-pointer bg-indigo-900/50">
+                      <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                   </div>
+                ))}
+             </div>
+          </div>
+        )}
         
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" className="fill-slate-50 w-full h-auto">
+        <div className="absolute bottom-0 left-0 right-0 z-10">
+          <svg viewBox="0 0 1440 120" className="fill-slate-50 w-full h-auto block">
             <path d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,42.7C1120,32,1280,32,1360,32L1440,32L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path>
           </svg>
         </div>
@@ -1791,6 +1852,32 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                     ></textarea>
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                <h4 className="font-extrabold text-lg text-indigo-800 mb-4 flex items-center">
+                   <span className="w-6 h-1 bg-amber-500 rounded-full mr-3"></span> Galeri Roll Beranda (Maks. 10 Foto)
+                </h4>
+                <div className="mb-4">
+                   <label className="cursor-pointer bg-white text-indigo-700 border-2 border-indigo-200 hover:bg-indigo-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
+                     <Upload className="w-5 h-5 mr-2" /> Upload Foto Galeri
+                     <input type="file" accept="image/*" className="hidden" onChange={handleGaleriHeaderUpload} />
+                   </label>
+                   <p className="text-sm text-slate-500 mt-2 font-medium">Foto akan berjalan otomatis ke kanan. (Saat ini: {editForm.galeriHeader?.length || 0}/10)</p>
+                </div>
+                
+                {editForm.galeriHeader && editForm.galeriHeader.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 bg-white p-4 rounded-xl border border-slate-200">
+                     {editForm.galeriHeader.map((img: any) => (
+                        <div key={img.id} className="relative group rounded-xl overflow-hidden border border-slate-200 shadow-sm h-24">
+                           <img src={img.url} alt="Galeri" className="w-full h-full object-cover" />
+                           <button type="button" onClick={() => hapusGaleriHeader(img.id)} className="absolute top-1 right-1 bg-rose-500 text-white p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-md">
+                              <Trash2 className="w-4 h-4" />
+                           </button>
+                        </div>
+                     ))}
+                  </div>
+                )}
               </div>
 
               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
