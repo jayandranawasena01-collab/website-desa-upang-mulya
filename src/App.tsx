@@ -215,6 +215,7 @@ const initialBeranda = {
   heroBg: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
   logoHero: "", 
   headerLogo: "", 
+  outerBackground: "", 
   namaDesa: "Upang Mulya",
   deskripsiDesa: "Kecamatan Makarti Jaya, Kabupaten Banyuasin \nProvinsi Sumatera Selatan",
   fotoKades: "https://images.unsplash.com/photo-1552058544-f2b08422138a?w=400&q=80",
@@ -231,13 +232,7 @@ const initialBeranda = {
     { id: 1, url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
     { id: 2, url: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
     { id: 3, url: "https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
-    { id: 4, url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
-    { id: 5, url: "https://images.unsplash.com/photo-1604928141064-207cea6f571f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
-    { id: 6, url: "https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
-    { id: 7, url: "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
-    { id: 8, url: "https://images.unsplash.com/photo-1593113565694-c6f130d24c3d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
-    { id: 9, url: "https://images.unsplash.com/photo-1572005996025-06900f6b6474?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
-    { id: 10, url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" }
+    { id: 4, url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" }
   ]
 };
 
@@ -560,7 +555,11 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-slate-50 text-slate-800 relative selection:bg-indigo-200 selection:text-indigo-900">
+    <div 
+      className="min-h-screen w-full bg-slate-200 bg-fixed bg-cover bg-center"
+      style={{ backgroundImage: dataBeranda?.outerBackground ? `url(${dataBeranda.outerBackground})` : 'none' }}
+    >
+     <div className="max-w-[1440px] mx-auto min-h-screen flex flex-col font-sans bg-slate-50 text-slate-800 relative selection:bg-indigo-200 selection:text-indigo-900 shadow-[0_0_40px_rgba(0,0,0,0.3)] border-x border-slate-300">
       
       {/* Dialog Kustom (Pengganti Alert & Confirm) */}
       {dialog.isOpen && (
@@ -609,7 +608,7 @@ export default function App() {
             animation: roll-left 15s linear infinite;
           }
           
-          /* Gallery Roll Animation to the RIGHT (Kiri ke Kanan) */
+          /* Gallery Roll Animation to the RIGHT */
           @keyframes slide-right {
             0% { transform: translateX(-50%); }
             100% { transform: translateX(0); }
@@ -673,19 +672,21 @@ export default function App() {
             {/* KANAN: Navigasi dan Galeri (Khusus Desktop) */}
             <div className="hidden lg:flex flex-col items-end flex-grow max-w-[850px]">
               
-              {/* Desktop Gallery Roll (Batas Nav Beranda s/d Admin) */}
-              <div className="w-full overflow-hidden bg-black/40 border border-white/10 rounded-xl shadow-inner p-1.5 mb-3">
-                 <div className="animate-gallery-roll">
-                    {/* Duplikat array 2x agar animasi looping kiri ke kanan mulus sempurna dengan translateX(-50%) */}
-                    {[...galeriToRender, ...galeriToRender].map((img: any, idx: number) => (
-                       <div key={idx} className="w-[180px] xl:w-[208px] px-1.5 flex-shrink-0">
-                          <div className="w-full h-16 xl:h-20 rounded-lg overflow-hidden shadow-lg group cursor-pointer bg-indigo-900/50 border border-white/20 relative hover:border-amber-400 transition-colors">
-                             <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-[10s] ease-linear group-hover:scale-125" />
-                          </div>
-                       </div>
-                    ))}
-                 </div>
-              </div>
+              {/* Desktop Gallery Roll (Di Atas Nav) */}
+              {dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 && (
+                <div className="w-full overflow-hidden bg-black/40 border border-white/10 rounded-xl shadow-inner p-1.5 mb-3">
+                   <div className="animate-gallery-roll">
+                      {/* Duplikat array 2x agar animasi looping kiri ke kanan mulus sempurna dengan translateX(-50%) */}
+                      {[...galeriToRender, ...galeriToRender].map((img: any, idx: number) => (
+                         <div key={idx} className="w-[180px] xl:w-[208px] px-1.5 flex-shrink-0">
+                            <div className="w-full h-16 xl:h-20 rounded-lg overflow-hidden shadow-lg group cursor-pointer bg-indigo-900/50 border border-white/20 relative hover:border-amber-400 transition-colors">
+                               <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-[10s] ease-linear group-hover:scale-125" />
+                            </div>
+                         </div>
+                      ))}
+                   </div>
+                </div>
+              )}
 
               {/* Desktop Navigation */}
               <nav className="flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner w-full justify-between">
@@ -890,17 +891,19 @@ export default function App() {
         </div>
 
         {/* Mobile Gallery (Hanya tampil di ukuran Mobile karena Desktop sudah ada di samping Logo) */}
-        <div className="lg:hidden w-full overflow-hidden bg-black/40 border-t border-white/10 p-2 shadow-inner">
-           <div className="animate-gallery-roll">
-              {[...galeriToRender, ...galeriToRender].map((img: any, idx: number) => (
-                 <div key={idx} className="w-[23vw] sm:w-[120px] px-1 flex-shrink-0">
-                    <div className="w-full h-14 sm:h-20 rounded-lg overflow-hidden shadow-lg group cursor-pointer bg-indigo-900/50 border border-white/20 relative hover:border-amber-400 transition-colors">
-                       <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-[10s] ease-linear group-hover:scale-125" />
-                    </div>
-                 </div>
-              ))}
-           </div>
-        </div>
+        {dataBeranda.galeriHeader && dataBeranda.galeriHeader.length > 0 && (
+          <div className="lg:hidden w-full overflow-hidden bg-black/40 border-t border-white/10 p-2 shadow-inner">
+             <div className="animate-gallery-roll gap-2">
+                {[...galeriToRender, ...galeriToRender].map((img: any, idx: number) => (
+                   <div key={idx} className="w-[23vw] sm:w-[120px] flex-shrink-0">
+                      <div className="w-full h-14 sm:h-20 rounded-lg overflow-hidden shadow-lg group cursor-pointer bg-indigo-900/50 border border-white/20 relative hover:border-amber-400 transition-colors">
+                         <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-[10s] ease-linear group-hover:scale-125" />
+                      </div>
+                   </div>
+                ))}
+             </div>
+          </div>
+        )}
 
         {/* Mobile Navigation */}
         <div className={`lg:hidden bg-indigo-950/95 backdrop-blur-xl border-t border-white/10 overflow-hidden transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
@@ -1213,6 +1216,7 @@ export default function App() {
           </div>
         </div>
       )}
+     </div>
     </div>
   );
 }
@@ -1225,6 +1229,16 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
   
   const [showEditorAgenda, setShowEditorAgenda] = useState(false);
   const [editDataAgenda, setEditDataAgenda] = useState<any>({ id: null, judul: '', lokasi: '', tanggal: '' });
+
+  const handleOuterBgChange = (e: any) => {
+    const file = e.target.files[0];
+    if (file) {
+      compressImage(file, 1920, false, (base64: any) => {
+        setEditForm((prev: any) => ({ ...prev, outerBackground: base64 }));
+      });
+      e.target.value = '';
+    }
+  };
 
   const handleHeroBgChange = (e: any) => {
     const file = e.target.files[0];
@@ -1810,6 +1824,29 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
                           <input type="file" accept="image/*" className="hidden" onChange={handleHeroBgChange} />
                         </label>
                         <p className="text-sm text-slate-500 mt-2 font-medium">Gambar pemandangan untuk latar atas. Otomatis dikompres.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-span-full mb-2">
+                    <label className="block text-sm font-bold text-slate-700 mb-3">Gambar Latar Belakang Website (Luar / Pinggir)</label>
+                    <div className="flex items-center gap-5">
+                      {editForm.outerBackground ? (
+                         <img src={editForm.outerBackground} alt="Preview Outer Bg" className="w-32 h-20 object-cover rounded-xl shadow-sm border border-slate-200" />
+                      ) : (
+                         <div className="w-32 h-20 bg-slate-200 rounded-xl flex items-center justify-center border border-slate-300 border-dashed">
+                           <ImageIcon className="w-6 h-6 text-slate-400" />
+                         </div>
+                      )}
+                      <div className="flex-1">
+                        <label className="cursor-pointer bg-white text-indigo-700 border-2 border-indigo-200 hover:bg-indigo-50 px-5 py-2 rounded-xl font-bold flex items-center justify-center transition-all w-max shadow-sm">
+                          <Upload className="w-5 h-5 mr-2" /> Ganti Gambar Pinggir
+                          <input type="file" accept="image/*" className="hidden" onChange={handleOuterBgChange} />
+                        </label>
+                        <p className="text-sm text-slate-500 mt-2 font-medium">Gambar background untuk area luar website (mode box). Kosongkan jika tidak perlu.</p>
+                        {editForm.outerBackground && (
+                           <button type="button" onClick={() => setEditForm((prev: any) => ({ ...prev, outerBackground: '' }))} className="text-xs text-rose-500 font-bold mt-2 hover:underline">Hapus Latar Pinggir</button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -3447,6 +3484,7 @@ function HalamanBerita({ isAdmin, activeTab, daftarBerita, setDaftarBerita, data
         </div>
       )}
 
+      {/* Modal Editor Khusus Data Grafik */}
       {showEditorGrafik && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all duration-500">
           <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 animate-in zoom-in-95 border border-indigo-100">
@@ -3517,47 +3555,80 @@ function HalamanKontak() {
   return (
     <div className="animate-in fade-in zoom-in-95 duration-500 py-16 bg-slate-50 min-h-[70vh]">
       <div className="container mx-auto px-4 lg:px-8">
-        
         <div className="text-center mb-16">
-          <span className="text-amber-600 font-bold tracking-widest uppercase text-sm mb-2 block">Pusat Layanan</span>
+          <span className="text-amber-600 font-bold tracking-widest uppercase text-sm mb-2 block">Layanan Pengaduan</span>
           <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">Hubungi Kami</h2>
           <div className="w-24 h-1.5 bg-gradient-to-r from-indigo-600 to-indigo-400 mx-auto rounded-full"></div>
           <p className="mt-6 text-slate-600 max-w-2xl mx-auto text-lg leading-relaxed">
-            Pemerintah Desa Upang Mulya selalu terbuka terhadap saran, masukan, dan siap melayani kebutuhan administrasi warga.
+            Punya pertanyaan, masukan, atau perlu layanan dari Pemerintah Desa? Silakan kunjungi atau hubungi kami.
           </p>
         </div>
 
-        <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-10">
-          
-          <div className="w-full lg:w-1/3 flex flex-col gap-6">
-             <a href="https://wa.me/6282268764585" target="_blank" rel="noopener noreferrer" className="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 hover:border-indigo-300 hover:shadow-xl transition-all duration-300 group flex flex-col items-center text-center">
-                <div className="bg-green-100 p-5 rounded-full mb-6 group-hover:bg-green-500 group-hover:scale-110 transition-all duration-300 shadow-sm">
-                  <Phone className="w-8 h-8 text-green-600 group-hover:text-white transition-colors" />
-                </div>
-                <h3 className="text-xl font-extrabold text-slate-900 mb-2">WhatsApp / Telepon</h3>
-                <p className="text-slate-500 text-sm mb-4">Layanan Chat Otomatis/Admin Desa</p>
-                <span className="text-2xl font-black text-indigo-700">0822-6876-4585</span>
-             </a>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+          <div className="bg-white p-10 md:p-12 rounded-3xl shadow-xl border border-slate-100 h-full flex flex-col justify-between relative overflow-hidden">
+             <div className="absolute bottom-0 right-0 w-40 h-40 bg-indigo-50 rounded-tl-full -z-10"></div>
 
-             <div className="bg-white p-8 rounded-3xl shadow-lg border border-slate-100 hover:border-indigo-300 hover:shadow-xl transition-all duration-300 group flex flex-col items-center text-center">
-                <div className="bg-blue-100 p-5 rounded-full mb-6 group-hover:bg-blue-500 group-hover:scale-110 transition-all duration-300 shadow-sm">
-                  <Mail className="w-8 h-8 text-blue-600 group-hover:text-white transition-colors" />
+            <div>
+              <h3 className="text-3xl font-extrabold text-slate-900 mb-8 tracking-tight">Informasi Kontak</h3>
+              <div className="space-y-8">
+                <div className="flex items-start group">
+                  <div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600 mr-5 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-sm border border-indigo-100 group-hover:border-indigo-600">
+                    <MapPin className="w-7 h-7" />
+                  </div>
+                  <div className="pt-1">
+                    <h4 className="font-extrabold text-slate-900 text-xl">Alamat Kantor Desa</h4>
+                    <p className="text-slate-600 leading-relaxed mt-2 text-lg">
+                      Jl. Sunan Kalijaga Dusun II, Rt. 01 Rw. 01<br/>
+                      Kecamatan Makarti Jaya, Kabupaten Banyuasin<br/>
+                      Provinsi Sumatera Selatan, 30972
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-extrabold text-slate-900 mb-2">Email Resmi</h3>
-                <p className="text-slate-500 text-sm mb-4">Kirimkan persuratan / dokumen elektronik</p>
-                <span className="text-lg font-black text-indigo-700">upangmulya@gmail.com</span>
-             </div>
+                <div className="flex items-start group">
+                  <div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600 mr-5 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-sm border border-indigo-100 group-hover:border-indigo-600">
+                    <Phone className="w-7 h-7" />
+                  </div>
+                  <div className="pt-1">
+                    <h4 className="font-extrabold text-slate-900 text-xl">Telepon / WhatsApp</h4>
+                    <p className="text-slate-600 mt-2 text-lg font-medium">+62 822-6876-4585</p>
+                  </div>
+                </div>
+                <div className="flex items-start group">
+                  <div className="bg-indigo-50 p-4 rounded-2xl text-indigo-600 mr-5 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-sm border border-indigo-100 group-hover:border-indigo-600">
+                    <Mail className="w-7 h-7" />
+                  </div>
+                  <div className="pt-1">
+                    <h4 className="font-extrabold text-slate-900 text-xl">Email</h4>
+                    <p className="text-slate-600 mt-2 text-lg font-medium">upangmulya@gmail.com</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-12 pt-8 border-t border-slate-100 bg-slate-50 -mx-10 -mb-10 p-10 md:p-12 rounded-b-3xl">
+              <h4 className="font-extrabold text-slate-900 mb-5 text-xl">Jam Pelayanan Masyarakat:</h4>
+              <ul className="text-slate-700 space-y-3 text-lg">
+                <li className="flex justify-between items-center bg-white p-3 px-4 rounded-xl shadow-sm border border-slate-100"><span className="font-bold">Senin - Kamis</span> <span className="text-indigo-700 font-bold bg-indigo-50 px-3 py-1 rounded-lg">08.00 - 15.00 WIB</span></li>
+                <li className="flex justify-between items-center bg-white p-3 px-4 rounded-xl shadow-sm border border-slate-100"><span className="font-bold">Jumat</span> <span className="text-indigo-700 font-bold bg-indigo-50 px-3 py-1 rounded-lg">08.00 - 11.30 WIB</span></li>
+                <li className="flex justify-between items-center bg-rose-50 p-3 px-4 rounded-xl shadow-sm border border-rose-100"><span className="font-bold text-rose-800">Sabtu - Minggu</span> <span className="text-rose-700 font-bold">Tutup</span></li>
+              </ul>
+            </div>
           </div>
 
-          <div className="w-full lg:w-2/3 h-[500px] lg:h-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-white relative group">
-            <div className="absolute inset-0 bg-indigo-900/10 group-hover:bg-transparent transition-colors duration-500 pointer-events-none z-10"></div>
-            <a href="https://maps.app.goo.gl/yQoXnEaJc8n9dEbq9" target="_blank" rel="noopener noreferrer" className="block w-full h-full relative cursor-pointer">
+          <div className="bg-white p-3 rounded-3xl shadow-xl h-full min-h-[500px] border border-slate-100">
+            <a 
+              href="https://maps.app.goo.gl/YUxS68MLjqc1JLrR6" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="block w-full h-full bg-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-500 overflow-hidden relative group cursor-pointer"
+            >
               <img 
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-                alt="Peta Desa Upang Mulya" 
-                className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" 
+                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Peta" 
+                className="w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:opacity-80 transition-all duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent flex flex-col items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center transition-transform duration-300 group-hover:-translate-y-2">
                  <div className="bg-white p-4 rounded-full shadow-2xl mb-4 group-hover:shadow-[0_0_30px_rgba(79,70,229,0.6)] transition-all">
                    <MapPin className="w-10 h-10 text-indigo-600" />
                  </div>
@@ -3593,7 +3664,7 @@ function MobileNavButton({ children, active, onClick }: any) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all duration-300 ${
+      className={`block w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all duration-300 ${
         active 
           ? 'bg-indigo-800 text-amber-300 border-l-4 border-amber-400 shadow-inner' 
           : 'text-indigo-100 hover:bg-indigo-800/80 hover:text-white'
