@@ -673,8 +673,22 @@ export default function App() {
             {/* KANAN: Navigasi dan Galeri (Khusus Desktop) */}
             <div className="hidden lg:flex flex-col items-end flex-grow max-w-[850px]">
               
+              {/* Desktop Gallery Roll (Batas Nav Beranda s/d Admin) */}
+              <div className="w-full overflow-hidden bg-black/40 border border-white/10 rounded-xl shadow-inner p-1.5 mb-3">
+                 <div className="animate-gallery-roll">
+                    {/* Duplikat array 2x agar animasi looping kiri ke kanan mulus sempurna dengan translateX(-50%) */}
+                    {[...galeriToRender, ...galeriToRender].map((img: any, idx: number) => (
+                       <div key={idx} className="w-[180px] xl:w-[208px] px-1.5 flex-shrink-0">
+                          <div className="w-full h-16 xl:h-20 rounded-lg overflow-hidden shadow-lg group cursor-pointer bg-indigo-900/50 border border-white/20 relative hover:border-amber-400 transition-colors">
+                             <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-[10s] ease-linear group-hover:scale-125" />
+                          </div>
+                       </div>
+                    ))}
+                 </div>
+              </div>
+
               {/* Desktop Navigation */}
-              <nav className="flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner w-full justify-between mb-3">
+              <nav className="flex space-x-1 items-center bg-black/20 p-1.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner w-full justify-between">
                 <NavButton active={currentPage === 'beranda'} onClick={() => navigateTo('beranda')} icon={<Home className="w-4 h-4 mr-2" />}>Beranda</NavButton>
                 
                 {/* Dropdown Profil Desa */}
@@ -850,20 +864,6 @@ export default function App() {
                   )}
                 </div>
               </nav>
-
-              {/* Desktop Gallery Roll (Batas Nav Beranda s/d Admin) */}
-              <div className="w-full overflow-hidden bg-black/40 border border-white/10 rounded-xl shadow-inner p-1.5">
-                 <div className="animate-gallery-roll">
-                    {/* Duplikat array 2x agar animasi looping kiri ke kanan mulus sempurna dengan translateX(-50%) */}
-                    {[...galeriToRender, ...galeriToRender].map((img: any, idx: number) => (
-                       <div key={idx} className="w-[180px] xl:w-[208px] px-1.5 flex-shrink-0">
-                          <div className="w-full h-16 xl:h-20 rounded-lg overflow-hidden shadow-lg group cursor-pointer bg-indigo-900/50 border border-white/20 relative hover:border-amber-400 transition-colors">
-                             <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-[10s] ease-linear group-hover:scale-125" />
-                          </div>
-                       </div>
-                    ))}
-                 </div>
-              </div>
             </div>
 
             {/* Mobile Menu Toggle & Admin */}
@@ -887,6 +887,19 @@ export default function App() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Mobile Gallery (Hanya tampil di ukuran Mobile karena Desktop sudah ada di samping Logo) */}
+        <div className="lg:hidden w-full overflow-hidden bg-black/40 border-t border-white/10 p-2 shadow-inner">
+           <div className="animate-gallery-roll">
+              {[...galeriToRender, ...galeriToRender].map((img: any, idx: number) => (
+                 <div key={idx} className="w-[23vw] sm:w-[120px] px-1 flex-shrink-0">
+                    <div className="w-full h-14 sm:h-20 rounded-lg overflow-hidden shadow-lg group cursor-pointer bg-indigo-900/50 border border-white/20 relative hover:border-amber-400 transition-colors">
+                       <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-[10s] ease-linear group-hover:scale-125" />
+                    </div>
+                 </div>
+              ))}
+           </div>
         </div>
 
         {/* Mobile Navigation */}
@@ -998,19 +1011,6 @@ export default function App() {
 
               <MobileNavButton active={currentPage === 'kontak'} onClick={() => navigateTo('kontak')}>Kontak</MobileNavButton>
             </div>
-        </div>
-
-        {/* Mobile Gallery (Hanya tampil di ukuran Mobile karena Desktop sudah ada di samping Logo) */}
-        <div className="lg:hidden w-full overflow-hidden bg-black/40 border-t border-white/10 p-2 shadow-inner">
-           <div className="animate-gallery-roll">
-              {[...galeriToRender, ...galeriToRender].map((img: any, idx: number) => (
-                 <div key={idx} className="w-[23vw] sm:w-[120px] px-1 flex-shrink-0">
-                    <div className="w-full h-14 sm:h-20 rounded-lg overflow-hidden shadow-lg group cursor-pointer bg-indigo-900/50 border border-white/20 relative hover:border-amber-400 transition-colors">
-                       <img src={img.url} alt={`Galeri ${idx}`} className="w-full h-full object-cover transition-transform duration-[10s] ease-linear group-hover:scale-125" />
-                    </div>
-                 </div>
-              ))}
-           </div>
         </div>
       </header>
 
