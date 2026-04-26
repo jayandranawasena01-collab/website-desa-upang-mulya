@@ -24,13 +24,13 @@ let appId = 'desa-upang-mulya';
 
 // ================= KONFIGURASI DATABASE MANUAL =================
 const firebaseConfigManual = {
-  apiKey: "AIzaSyBIl0_tSPDJux9rr2FIL_-ZLZFqLPQ4WCY",
+  apiKey: "AIzaSyDDRuhPQdJvX69T-NtlMxaae-Tc6vnj8kM",
   authDomain: "web-desa-upang-mulya.firebaseapp.com",
   projectId: "web-desa-upang-mulya",
   storageBucket: "web-desa-upang-mulya.firebasestorage.app",
-  messagingSenderId: "673276122437",
-  appId: "1:673276122437:web:dc2de24a0209f40e6e5a2c",
-  measurementId: "G-JLGMKQXVV4"
+  messagingSenderId: "52513838186",
+  appId: "1:52513838186:web:a8cd15ddcfb4009f672613",
+  measurementId: "G-MC5D8EVHT7"
 };
 
 // Mencegah Firebase berjalan saat proses "Build" di server Vercel (SSR)
@@ -241,7 +241,6 @@ const initialBeranda = {
 export default function App() {
   const [user, setUser] = useState<any>(null);
   const [isDbConnected, setIsDbConnected] = useState(false); 
-  const [dbError, setDbError] = useState(""); 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // State Active Pages & Tabs disimpan di localStorage agar tidak kembali ke beranda saat refresh
@@ -344,12 +343,8 @@ export default function App() {
           await signInAnonymously(auth);
         }
       } catch (error: any) {
-        console.error("Auth error:", error.message);
-        if (error.code === 'auth/operation-not-allowed' || error.code === 'auth/configuration-not-found') {
-          setDbError("Autentikasi Firebase gagal. Pastikan metode 'Anonymous Login' sudah Anda aktifkan di menu Authentication Firebase Console.");
-        } else {
-          setDbError(`Firebase Error: ${error.message}`);
-        }
+        console.warn("Berjalan dalam Mode Lokal. Hubungkan ke Firebase jika ingin sinkronisasi online.");
+        setIsDbConnected(false);
       }
     };
     initAuth();
@@ -370,7 +365,6 @@ export default function App() {
 
     const handleServerData = (snap: any, stateSetter: any, storageKey: string) => {
       setIsDbConnected(true); 
-      setDbError(""); 
       if (snap.exists()) {
         const val = snap.data().value;
         const parsedData = typeof val === 'string' ? JSON.parse(val) : val;
@@ -383,11 +377,8 @@ export default function App() {
     };
 
     const handleServerError = (err: any) => {
-      console.error("Gagal sinkronisasi data:", err);
+      console.warn("Beralih ke mode lokal secara otomatis karena akses sinkronisasi Firebase memerlukan pengaturan rules.");
       setIsDbConnected(false);
-      if (err.code === 'permission-denied') {
-        setDbError("Akses Database Ditolak! Masuk ke Firebase Console Anda, buka menu Firestore Database, klik tab 'Rules', lalu ubah isinya menjadi 'allow read, write: if true;' dan klik Publish.");
-      }
     };
 
     const unsubBeranda = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'upang_mulya_beranda', 'main'), 
@@ -975,20 +966,13 @@ export default function App() {
              <span>Mode Admin Aktif: Anda dapat mengedit konten website.</span>
            </div>
            
-           {!isDbConnected && !dbError && (
-             <div className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold animate-pulse">
-               ⏳ Menghubungkan ke Server / Mode Offline Sementara...
+           {!isDbConnected ? (
+             <div className="bg-amber-100 text-amber-800 border border-amber-300 px-4 py-1.5 rounded-full text-xs font-bold shadow-sm">
+               ⚡ Mode Penyimpanan Lokal (Perubahan tersimpan dengan aman di perangkat ini)
              </div>
-           )}
-           {isDbConnected && (
-             <div className="bg-indigo-200 text-indigo-800 border border-indigo-400 px-3 py-1 rounded-full text-xs font-bold">
+           ) : (
+             <div className="bg-indigo-200 text-indigo-800 border border-indigo-400 px-4 py-1.5 rounded-full text-xs font-bold shadow-sm">
                ✅ Status Database: ONLINE (Tersinkronisasi dengan Server).
-             </div>
-           )}
-
-           {dbError && (
-             <div className="bg-rose-200 text-rose-800 border border-rose-400 px-4 py-2 rounded-xl text-xs font-bold w-full max-w-2xl mt-1 text-left sm:text-center shadow-sm">
-               ⚠️ {dbError}
              </div>
            )}
         </div>
