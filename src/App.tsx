@@ -1570,7 +1570,7 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1592982537447-6f2a6a0a091c?w=1920&q=80')", backgroundSize: 'cover', backgroundPosition: 'center', filter: 'grayscale(100%)' }}></div>
         
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8 text-center">
             {dataBeranda.stats.map((stat: any, index: number) => {
               // --- SINKRONISASI DATA GRAFIK KE TOTAL PENDUDUK ---
               let displayNum = stat.num;
@@ -1585,27 +1585,27 @@ function HalamanBeranda({ navigateTo, isAdmin, dataBeranda, setDataBeranda, daft
               }
 
               return (
-                <div key={stat.id} className="p-5 sm:p-8 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:bg-white/10 hover:-translate-y-2 transition-all duration-300 flex flex-col justify-center h-full relative overflow-hidden group">
+                <div key={stat.id} className="p-3 min-[400px]:p-5 sm:p-8 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:bg-white/10 hover:-translate-y-2 transition-all duration-300 flex flex-col justify-center h-full relative overflow-hidden group">
                   <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
                   
-                  <div className="text-4xl sm:text-5xl font-extrabold text-white mb-2 drop-shadow-md z-10">
+                  <div className="text-3xl min-[380px]:text-4xl sm:text-5xl font-extrabold text-white mb-1 sm:mb-2 drop-shadow-md z-10 truncate w-full px-1">
                      <AnimatedNumber value={displayNum} />
                   </div>
-                  <div className="text-indigo-200 font-bold text-xs sm:text-lg tracking-wide z-10">{stat.label}</div>
+                  <div className="text-indigo-200 font-bold text-[10px] min-[380px]:text-xs sm:text-lg tracking-wide z-10 truncate w-full px-1">{stat.label}</div>
 
                   {stat.id === 1 && (
-                    <div className="flex justify-between items-stretch gap-2 mt-5 pt-5 border-t border-white/20 w-full z-10">
-                      <div className="flex flex-col items-center justify-center w-1/2 bg-indigo-900/50 rounded-xl py-3 px-2 shadow-inner border border-indigo-800/50">
-                        <span className="font-black text-amber-300 text-base sm:text-xl leading-none drop-shadow-md">
+                    <div className="flex justify-between items-stretch gap-1.5 sm:gap-2 mt-3 sm:mt-5 pt-3 sm:pt-5 border-t border-white/20 w-full z-10">
+                      <div className="flex flex-col items-center justify-center w-1/2 bg-indigo-900/50 rounded-lg sm:rounded-xl py-2 px-1 sm:py-3 sm:px-2 shadow-inner border border-indigo-800/50 overflow-hidden">
+                        <span className="font-black text-amber-300 text-[11px] min-[380px]:text-sm sm:text-xl leading-none drop-shadow-md truncate w-full text-center">
                           <AnimatedNumber value={displayLaki} />
                         </span>
-                        <span className="text-[8px] sm:text-[11px] text-indigo-100 font-bold uppercase tracking-wider mt-2 text-center w-full">Laki-laki</span>
+                        <span className="text-[7px] min-[380px]:text-[8px] sm:text-[11px] text-indigo-100 font-bold uppercase tracking-wider mt-1 sm:mt-2 text-center w-full truncate">Laki-laki</span>
                       </div>
-                      <div className="flex flex-col items-center justify-center w-1/2 bg-indigo-900/50 rounded-xl py-3 px-2 shadow-inner border border-indigo-800/50">
-                        <span className="font-black text-rose-300 text-base sm:text-xl leading-none drop-shadow-md">
+                      <div className="flex flex-col items-center justify-center w-1/2 bg-indigo-900/50 rounded-lg sm:rounded-xl py-2 px-1 sm:py-3 sm:px-2 shadow-inner border border-indigo-800/50 overflow-hidden">
+                        <span className="font-black text-rose-300 text-[11px] min-[380px]:text-sm sm:text-xl leading-none drop-shadow-md truncate w-full text-center">
                           <AnimatedNumber value={displayPerempuan} />
                         </span>
-                        <span className="text-[8px] sm:text-[11px] text-indigo-100 font-bold uppercase tracking-wider mt-2 text-center w-full">Perempuan</span>
+                        <span className="text-[7px] min-[380px]:text-[8px] sm:text-[11px] text-indigo-100 font-bold uppercase tracking-wider mt-1 sm:mt-2 text-center w-full truncate">Perempuan</span>
                       </div>
                     </div>
                   )}
@@ -3605,36 +3605,42 @@ function HalamanKontak() {
               </div>
             </div>
             
-            <div className="mt-12 pt-8 border-t border-slate-100 bg-slate-50 -mx-10 -mb-10 p-10 md:p-12 rounded-b-3xl">
-              <h4 className="font-extrabold text-slate-900 mb-5 text-xl">Jam Pelayanan Masyarakat:</h4>
-              <ul className="text-slate-700 space-y-3 text-lg">
-                <li className="flex justify-between items-center bg-white p-3 px-4 rounded-xl shadow-sm border border-slate-100"><span className="font-bold">Senin - Kamis</span> <span className="text-indigo-700 font-bold bg-indigo-50 px-3 py-1 rounded-lg">08.00 - 15.00 WIB</span></li>
-                <li className="flex justify-between items-center bg-white p-3 px-4 rounded-xl shadow-sm border border-slate-100"><span className="font-bold">Jumat</span> <span className="text-indigo-700 font-bold bg-indigo-50 px-3 py-1 rounded-lg">08.00 - 11.30 WIB</span></li>
-                <li className="flex justify-between items-center bg-rose-50 p-3 px-4 rounded-xl shadow-sm border border-rose-100"><span className="font-bold text-rose-800">Sabtu - Minggu</span> <span className="text-rose-700 font-bold">Tutup</span></li>
-              </ul>
+            <div className="mt-12 bg-indigo-50 rounded-2xl p-6 border border-indigo-100 flex items-center justify-between group cursor-pointer hover:bg-indigo-100 transition-colors">
+               <div>
+                  <h4 className="font-bold text-indigo-900 mb-1">Jam Operasional</h4>
+                  <p className="text-indigo-700 text-sm font-medium">Senin - Jumat (08:00 - 15:00)</p>
+               </div>
+               <div className="bg-white p-3 rounded-xl shadow-sm text-indigo-600 group-hover:scale-110 transition-transform">
+                  <CalendarDays className="w-6 h-6" />
+               </div>
             </div>
           </div>
 
-          <div className="bg-white p-3 rounded-3xl shadow-xl h-full min-h-[500px] border border-slate-100">
+          <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden h-[500px] md:h-full relative group">
             <a 
-              href="https://maps.app.goo.gl/YUxS68MLjqc1JLrR6" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="block w-full h-full bg-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-500 overflow-hidden relative group cursor-pointer"
+               href="https://maps.app.goo.gl/" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Peta" 
-                className="w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:opacity-80 transition-all duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
-              <div className="absolute inset-0 flex flex-col items-center justify-center transition-transform duration-300 group-hover:-translate-y-2">
+              <div className="transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500 flex flex-col items-center justify-center p-2">
                  <div className="bg-white p-4 rounded-full shadow-2xl mb-4 group-hover:shadow-[0_0_30px_rgba(79,70,229,0.6)] transition-all">
                    <MapPin className="w-10 h-10 text-indigo-600" />
                  </div>
                  <span className="font-extrabold text-2xl text-white drop-shadow-lg text-center px-4">Lokasi Kantor <br/> Desa Upang Mulya</span>
               </div>
             </a>
+            {/* Menggunakan iframe Google Maps atau gambar placeholder jika iframe tidak ada */}
+            <iframe 
+               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15939.336440263236!2d104.9197999!3d-2.5186000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e3b6d21394f9999%3A0x8671694f4a36f56c!2sUpang%20Mulya%2C%20Makarti%20Jaya%2C%20Banyuasin%20Regency%2C%20South%20Sumatra!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid" 
+               width="100%" 
+               height="100%" 
+               style={{border:0}} 
+               allowFullScreen={false} 
+               loading="lazy" 
+               referrerPolicy="no-referrer-when-downgrade"
+               className="w-full h-full grayscale-[30%] hover:grayscale-0 transition-all duration-700"
+            ></iframe>
           </div>
         </div>
       </div>
@@ -3664,13 +3670,13 @@ function MobileNavButton({ children, active, onClick }: any) {
   return (
     <button
       onClick={onClick}
-      className={`block w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all duration-300 ${
-        active 
-          ? 'bg-indigo-800 text-amber-300 border-l-4 border-amber-400 shadow-inner' 
+      className={`flex items-center justify-between w-full text-left px-5 py-4 rounded-xl text-lg font-bold transition-all duration-300 ${
+        active
+          ? 'bg-indigo-800 text-amber-300 border-l-4 border-amber-400 shadow-inner'
           : 'text-indigo-100 hover:bg-indigo-800/80 hover:text-white'
       }`}
     >
-      {children}
+      <span>{children}</span>
     </button>
   );
 }
